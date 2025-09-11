@@ -21,15 +21,20 @@ builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     if (builder.Environment.IsDevelopment())
+    {
         options.UseSqlite("Data Source=gamma2024.db");
+    }
     else
+    {
+        // En production, utiliser DATABASE_URL de Railway ou DefaultConnection
+        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+            ?? builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("No database connection string found.");
         options.UseNpgsql(connectionString);
+    }
 });
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
