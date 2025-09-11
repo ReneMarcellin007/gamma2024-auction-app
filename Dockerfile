@@ -25,6 +25,17 @@ RUN dotnet restore "Gamma2024.Server/Gamma2024.Server.csproj"
 # Copy source code
 COPY . .
 
+# Build Vue.js frontend manually
+WORKDIR /src/gamma2024.client
+RUN npm install
+RUN npm run build:dev
+
+# Copy built frontend to .NET wwwroot
+RUN mkdir -p /src/Gamma2024.Server/wwwroot && \
+    cp -r dist/* /src/Gamma2024.Server/wwwroot/
+
+WORKDIR /src
+
 # Build the application
 RUN dotnet build "Gamma2024.Server/Gamma2024.Server.csproj" -c Release -o /app/build --no-restore
 
