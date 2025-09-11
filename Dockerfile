@@ -28,10 +28,11 @@ COPY . .
 # Build Vue.js frontend manually
 WORKDIR /src/gamma2024.client
 RUN npm install
-RUN npm run build:dev
+RUN npm run build:railway
 
-# Copy built frontend to .NET wwwroot
-RUN mkdir -p /src/Gamma2024.Server/wwwroot && \
+# Remove existing wwwroot files to avoid conflicts, then copy Vue.js build
+RUN rm -rf /src/Gamma2024.Server/wwwroot/* && \
+    mkdir -p /src/Gamma2024.Server/wwwroot && \
     cp -r dist/* /src/Gamma2024.Server/wwwroot/
 
 WORKDIR /src
