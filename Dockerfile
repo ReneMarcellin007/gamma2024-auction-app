@@ -6,6 +6,14 @@ ENV ASPNETCORE_URLS=http://+:$PORT
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
+# Install Node.js for Vue.js build
+RUN apt-get update && \
+    apt-get install -y curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    node --version && \
+    npm --version
+
 # Copy solution and project files
 COPY ["Gamma2024.Server/Gamma2024.Server.csproj", "Gamma2024.Server/"]
 COPY ["gamma2024.client/gamma2024.client.esproj", "gamma2024.client/"]
