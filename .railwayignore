@@ -1,0 +1,20 @@
+# Railway ignore file
+.git/
+node_modules/
+gamma2024.client/node_modules/
+*.log
+*.db
+*.db-shm
+*.db-wal
+gamma2024.db*
+bin/
+obj/
+.vs/
+.vscode/
+Images/
+CSV/
+Gamma.Seeder/
+azure-pipeline/
+azure-pipelines/
+*.md
+!README.md
