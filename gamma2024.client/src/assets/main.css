@@ -1,0 +1,95 @@
+@import './base.css';
+
+.bleuMarinFond {
+    background-color: #052445;
+}
+
+
+.green {
+    text-decoration: none;
+    color: hsla(160, 100%, 37%, 1);
+    transition: 0.4s;
+    padding: 3px;
+}
+
+.bleuMarinSecondaireFond {
+    background-color: #1C3755;
+}
+
+.bleuMoyenFond {
+    background-color: #5A708A;
+}
+
+.btnSurvolerBleuMoyenFond:hover {
+    background-color: #83a0ba;
+}
+
+.btnSurvolerBleuMoyenFond:enabled {
+    background-color: #1C3755;
+}
+
+.btnBarreNavBleuMoyenFond:enabled {
+    background-color: #83a0ba;
+}
+
+.btnDesactiverBleuMoyenFond:disabled {
+    background-color: #617d9a;
+}
+
+.btnSurvolerBleuMoyenFond:focus {
+    background-color: #83a0ba !important;
+}
+
+
+.lienEnTexteNoir {
+    color: #000000;
+}
+
+    .lienEnTexteNoir:hover {
+        color: #6c757d;
+    }
+
+.imageDeFondEsquise {
+    background-image: url('/images/DessinGris.png');
+    background-size: cover;
+    background-position: 0px -100px;
+    background-attachment: fixed;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.justifyText {
+    text-align: justify;
+}
+
+.transpositionImage {
+    transform: scaleX(-1);
+}
+
+.contourDiv {
+    border-style: solid;
+    border-width: 2px;
+    border-color: #1C3755;
+    border-radius: 10px;
+}
+
+.contenuListeDropdown:hover {
+    background-color: #5A708A;
+}
+
+.butttonNavBar {
+    height: 25px;
+    font-size: 15px;
+}
+
+.btnClick:focus {
+    background-color: #5A708A;
+}
+
+.fs-7 {
+    font-size: 0.89rem;
+}
+
+.btnModifierIcone:hover {
+    background-color: #5A708A;
+}

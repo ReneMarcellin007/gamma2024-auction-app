@@ -1,0 +1,186 @@
+trigger:
+  - master
+
+pool:
+  name: "Default"
+
+variables:
+  solution: "**/*.sln"
+  buildPlatform: "Any CPU"
+  buildConfiguration: "Release"
+
+stages:
+  - stage: Build_Stage
+    jobs:
+      - job: Build_Application
+        steps:
+          - task: NuGetToolInstaller@1
+
+          - task: NuGetCommand@2
+            inputs:
+              restoreSolution: "$(solution)"
+
+          - task: VSBuild@1
+            inputs:
+              solution: "$(solution)"
+              msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="$(Build.ArtifactStagingDirectory)"'
+              platform: "$(buildPlatform)"
+              configuration: "$(buildConfiguration)"
+
+          - script: |
+              echo "Vous devriez parler avec [$(Build.RequestedFor)], car il y a des chances que l'erreur ait été introduite par cette personne"
+              echo "Last commit author: $(Build.RequestedFor)"
+              echo "Last commit email: $(Build.RequestedForEmail)"
+              echo "Commit ID: $(Build.SourceVersion)"
+            displayName: "Print commit info"
+            condition: failed()
+
+          - task: VSTest@2
+            inputs:
+              platform: "$(buildPlatform)"
+              configuration: "$(buildConfiguration)"
+
+          - script: |
+              echo "Vous devriez parler avec [$(Build.RequestedFor)], car il y a des chances que l'erreur ait été introduite par cette personne"
+              echo "Last commit author: $(Build.RequestedFor)"
+              echo "Last commit email: $(Build.RequestedForEmail)"
+              echo "Commit ID: $(Build.SourceVersion)"
+            displayName: "Print commit info"
+            condition: failed()
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
+              includeRootFolder: false
+              archiveType: "zip"
+              archiveFile: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip"
+              replaceExistingArchive: true
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip"
+              ArtifactName: "webapp"
+              publishLocation: "Container"
+
+  - stage: UpdateDB_Stage
+    dependsOn: Build_Stage
+    condition: succeeded('Build_Stage')
+    jobs:
+      - job: Generate_SQL_script
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: "8.0.x"
+            displayName: "Use .NET Core 8.0"
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: "build"
+              projects: "$(solution)"
+              arguments: "--configuration $(buildConfiguration)"
+            displayName: "Build .NET Core project"
+
+          # Database sql script creation
+          - task: DotNetCoreCLI@2
+            displayName: "Install EF Core tools"
+            inputs:
+              command: "custom"
+              custom: "tool"
+              arguments: "install --global dotnet-ef"
+
+          - task: DotNetCoreCLI@2
+            displayName: "Generate migration script"
+            inputs:
+              command: "custom"
+              custom: "ef"
+              arguments: "migrations script --output $(Build.ArtifactStagingDirectory)/migrate.sql --idempotent --startup-project $(ProjectNameWithDB) " #--context ApplicationDbContext"
+
+          # Publish artifact (sql script) for debugging purposes
+          - publish: $(Build.ArtifactStagingDirectory)/migrate.sql
+            artifact: db-migrations
+
+          # Retrieve db-migrations artifact
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: "db-migrations"
+              targetPath: "$(Pipeline.Workspace)"
+
+          # Update the database (same as doing manually update-database)
+          - task: SqlDacpacDeploymentOnMachineGroup@0
+            displayName: "Execute migration script"
+            inputs:
+              TaskType: "sqlQuery"
+              ServerName: sqlinfocg.cegepgranby.qc.ca
+              DatabaseName: $(sqlDatabase)
+              AuthScheme: sqlServerAuthentication
+              SqlUsername: $(sqlUsername)
+              SqlPassword: $(sqlPassword)
+              SqlFile: "$(Pipeline.Workspace)\\migrate.sql"
+
+  - stage: Deploy_Website
+    dependsOn:
+      - UpdateDB_Stage
+    condition: and(succeeded('Build_Stage'), succeeded('UpdateDB_Stage'))
+    jobs:
+      - job: Delete_FTP_WebConfig
+        steps:
+          # Delete the web.config file from the FTP server in order to avoid error 550 during the FTP upload.
+          # This is a workaround since the FTP task does not support deleting a file
+          # By removing the web.config file, the IIS server will stop serving the website and will release the handle on the files (which is causing the error 550 during the FTP upload)
+          - task: PowerShell@2
+            inputs:
+              targetType: "inline"
+              script: |
+                $ftpUrl = "ftp://sqlinfocg.cegepgranby.qc.ca/$($env:ftpDirectory)/web.config"
+                $credentials = New-Object System.Net.NetworkCredential($env:ftpUsername, $env:ftpPassword)
+
+                $ftpRequest = [System.Net.FtpWebRequest]::Create($ftpUrl)
+                $ftpRequest.Method = [System.Net.WebRequestMethods+Ftp]::DeleteFile
+                $ftpRequest.Credentials = $credentials
+                $ftpRequest.UseBinary = $true
+                $ftpRequest.KeepAlive = $false
+
+                try {
+                    Write-Host "ftpUrl: $ftpUrl"
+                    $response = $ftpRequest.GetResponse()
+                    $response.Close()
+                    Write-Host "Successfully deleted web.config"
+                } catch {
+                    Write-Host "File web.config not found or already deleted"
+                }
+            env:
+              ftpUsername: $(ftpUsername)
+              ftpPassword: $(ftpPassword)
+              ftpDirectory: $(ftpDirectory)
+            displayName: "Stop the web server (delete web.config)"
+
+      - job: Deploy_Website
+        dependsOn: Delete_FTP_WebConfig
+        condition: succeeded()
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: "current"
+              downloadType: "single"
+              artifactName: "webapp"
+              downloadPath: "$(System.ArtifactsDirectory)"
+
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: "$(System.ArtifactsDirectory)/**/*.zip"
+              destinationFolder: "$(System.ArtifactsDirectory)/extracted"
+              cleanDestinationFolder: true
+
+          - task: FtpUpload@2
+            inputs:
+              credentialsOption: "inputs"
+              serverUrl: "ftp://sqlinfocg.cegepgranby.qc.ca"
+              username: "$(ftpUsername)"
+              password: "$(ftpPassword)"
+              rootDirectory: "$(System.ArtifactsDirectory)/extracted"
+              filePatterns: "**"
+              remoteDirectory: "/$(ftpDirectory)"
+              cleanContents: false
+              preservePaths: true
+              trustSSL: true
+            displayName: "FTP Upload WebAPI"

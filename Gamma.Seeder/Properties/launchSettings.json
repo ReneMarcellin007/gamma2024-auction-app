@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Gamma2024.Seeder": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

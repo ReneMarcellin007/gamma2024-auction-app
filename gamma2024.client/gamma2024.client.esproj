@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.128-alpha">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|AnyCPU">
+			<Configuration>Debug</Configuration>
+			<Platform>AnyCPU</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Staging|AnyCPU">
+			<Configuration>Staging</Configuration>
+			<Platform>AnyCPU</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|AnyCPU">
+			<Configuration>Release</Configuration>
+			<Platform>AnyCPU</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<BuildCommand>npm run dev</BuildCommand>
+		<ShouldRunBuildScript>false</ShouldRunBuildScript>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Staging'">
+		<BuildCommand>npm run build:staging</BuildCommand>
+		<ShouldRunBuildScript>false</ShouldRunBuildScript>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<BuildCommand>npm run build:prod</BuildCommand>
+		<ShouldRunBuildScript>false</ShouldRunBuildScript>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<StartupCommand>npm run dev</StartupCommand>
+		<JavaScriptTestRoot>.\</JavaScriptTestRoot>
+		<JavaScriptTestFramework>Jest</JavaScriptTestFramework>
+		<!-- Allows the build (or compile) script located on package.json to run on Build -->
+		<ShouldRunBuildScript>false</ShouldRunBuildScript>
+		<!-- Folder where production build objects will be placed -->
+		<PublishAssetsDirectory>$(MSBuildProjectDirectory)\dist</PublishAssetsDirectory>
+	</PropertyGroup>
+
+</Project>
