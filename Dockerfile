@@ -30,11 +30,12 @@ WORKDIR /src/gamma2024.client
 RUN npm install
 RUN npm run build:railway
 
-# Backup Images folder, clear wwwroot, copy Vue.js build, restore Images
+# Backup Images folder, clear wwwroot, copy Vue.js build (except favicon.ico), restore Images
 RUN mkdir -p /tmp/backup && \
     cp -r /src/Gamma2024.Server/wwwroot/Images /tmp/backup/ 2>/dev/null || true && \
     rm -rf /src/Gamma2024.Server/wwwroot/* && \
     mkdir -p /src/Gamma2024.Server/wwwroot && \
+    rm -f dist/favicon.ico && \
     cp -r dist/* /src/Gamma2024.Server/wwwroot/ && \
     cp -r /tmp/backup/Images /src/Gamma2024.Server/wwwroot/ 2>/dev/null || true
 
