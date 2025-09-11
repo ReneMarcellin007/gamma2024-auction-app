@@ -564,5 +564,4 @@ FodyWeavers.xsd
 *.db-wal
 gamma2024.db*
 appsettings.Development.json.backup
-Images/
 CSV/
