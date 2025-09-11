@@ -29,10 +29,38 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     }
     else
     {
-        // En production, utiliser DATABASE_URL de Railway ou DefaultConnection
-        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+        // Debug: afficher les variables d'environnement disponibles
+        Console.WriteLine("=== DEBUG Railway Environment Variables ===");
+        Console.WriteLine($"DATABASE_URL: {Environment.GetEnvironmentVariable("DATABASE_URL")}");
+        Console.WriteLine($"PGDATABASE: {Environment.GetEnvironmentVariable("PGDATABASE")}");
+        Console.WriteLine($"PGHOST: {Environment.GetEnvironmentVariable("PGHOST")}");
+        Console.WriteLine($"PGPORT: {Environment.GetEnvironmentVariable("PGPORT")}");
+        Console.WriteLine($"PGUSER: {Environment.GetEnvironmentVariable("PGUSER")}");
+        Console.WriteLine($"PGPASSWORD: {Environment.GetEnvironmentVariable("PGPASSWORD")}");
+        
+        // Essayer de construire une connection string à partir des variables individuelles si DATABASE_URL n'existe pas
+        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+        
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            var host = Environment.GetEnvironmentVariable("PGHOST");
+            var port = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+            var database = Environment.GetEnvironmentVariable("PGDATABASE");
+            var username = Environment.GetEnvironmentVariable("PGUSER");
+            var password = Environment.GetEnvironmentVariable("PGPASSWORD");
+            
+            if (!string.IsNullOrEmpty(host) && !string.IsNullOrEmpty(database) && !string.IsNullOrEmpty(username))
+            {
+                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+                Console.WriteLine($"Built connection string from individual vars: {connectionString}");
+            }
+        }
+        
+        connectionString = connectionString 
             ?? builder.Configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("No database connection string found.");
+            
+        Console.WriteLine($"Using connection string: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
         options.UseNpgsql(connectionString);
     }
 });
@@ -192,14 +220,16 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Auto-migration en production
+// Auto-migration en production - TEMPORAIREMENT DÉSACTIVÉ POUR DEBUG
 if (!app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
-    }
+    Console.WriteLine("=== DEBUG: Production environment detected, but skipping migration for now ===");
+    // DÉSACTIVÉ TEMPORAIREMENT POUR DEBUG
+    // using (var scope = app.Services.CreateScope())
+    // {
+    //     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    //     context.Database.Migrate();
+    // }
 }
 
 if (app.Environment.IsDevelopment())
