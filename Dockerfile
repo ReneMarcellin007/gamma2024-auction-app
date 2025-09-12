@@ -39,8 +39,10 @@ RUN mkdir -p /tmp/backup && \
     rm -rf dist/icons && \
     rm -rf dist/images && \
     cp -r dist/* /src/Gamma2024.Server/wwwroot/ && \
-    cp -r /tmp/backup/Images /src/Gamma2024.Server/wwwroot/ 2>/dev/null || true && \
-    mv dist /tmp/vue-dist
+    cp -r /tmp/backup/Images /src/Gamma2024.Server/wwwroot/ 2>/dev/null || true
+
+# Move Vue.js project files to prevent .NET from rebuilding during publish
+RUN mv /src/gamma2024.client /tmp/gamma2024.client-backup
 
 WORKDIR /src
 
