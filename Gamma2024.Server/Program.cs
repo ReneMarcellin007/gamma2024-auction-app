@@ -346,7 +346,10 @@ using (var scope = app.Services.CreateScope())
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    Name = "Administrateur",
+                    FirstName = "Admin",
+                    StripeCustomer = ""
                 };
                 
                 var result = await userManager.CreateAsync(adminUser, "Admin123!");
