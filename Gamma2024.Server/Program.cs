@@ -93,7 +93,6 @@ builder.Services.AddScoped<LotService>();
 builder.Services.AddScoped<FactureService>();
 builder.Services.AddScoped<FactureLivraisonService>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<DatabaseSeederService>();
 builder.Services.AddHostedService<VerificationLotsBackgroundService>();
 
 builder.Services.Configure<EmailConfiguration>(
@@ -228,7 +227,8 @@ if (!app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeederService>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         
         try
         {
@@ -237,17 +237,33 @@ if (!app.Environment.IsDevelopment())
             context.Database.Migrate();
             Console.WriteLine("Migrations applied successfully.");
             
-            // Vérifier si la BD est vide et seeder si nécessaire
-            // Force seeding if no encans exist (even if users exist)
-            if (!context.Users.Any() || !context.Encans.Any())
+            // Créer les rôles de base
+            string[] roleNames = { "Admin", "Client", "Vendeur" };
+            foreach (var roleName in roleNames)
             {
-                Console.WriteLine("Database is empty, running seeder...");
-                seeder.SeedDatabaseAsync().GetAwaiter().GetResult();
-                Console.WriteLine("Database seeding completed successfully.");
+                if (!roleManager.RoleExistsAsync(roleName).GetAwaiter().GetResult())
+                {
+                    roleManager.CreateAsync(new IdentityRole(roleName)).GetAwaiter().GetResult();
+                    Console.WriteLine($"Role '{roleName}' created.");
+                }
             }
-            else
+            
+            // Créer un utilisateur admin par défaut si aucun n'existe
+            if (!context.Users.Any())
             {
-                Console.WriteLine("Database already contains data, skipping seeding.");
+                var admin = new ApplicationUser
+                {
+                    UserName = "admin@admin.com",
+                    Email = "admin@admin.com",
+                    EmailConfirmed = true
+                };
+                
+                var result = userManager.CreateAsync(admin, "Admin123!").GetAwaiter().GetResult();
+                if (result.Succeeded)
+                {
+                    userManager.AddToRoleAsync(admin, "Admin").GetAwaiter().GetResult();
+                    Console.WriteLine("Admin user created successfully.");
+                }
             }
         }
         catch (Exception ex)
