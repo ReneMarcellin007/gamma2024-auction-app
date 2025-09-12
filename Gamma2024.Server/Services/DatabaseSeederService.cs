@@ -2,6 +2,7 @@ using Gamma2024.Server.Data;
 using Gamma2024.Server.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace Gamma2024.Server.Services
 {
@@ -181,7 +182,11 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanPresent.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "001",
+                                Artiste = "Artisan Inconnu",
+                                Categorie = "Céramique",
+                                Medium = "Porcelaine"
                             },
                             new Lot
                             {
@@ -194,7 +199,11 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanPresent.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "002",
+                                Artiste = "École Française",
+                                Categorie = "Peinture",
+                                Medium = "Huile sur toile"
                             },
                             new Lot
                             {
@@ -207,7 +216,11 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanPresent.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "003",
+                                Artiste = "Horloger Suisse",
+                                Categorie = "Horlogerie",
+                                Medium = "Or 18 carats"
                             },
                             new Lot
                             {
@@ -220,7 +233,11 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanPresent.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "004",
+                                Artiste = "Ébéniste Royal",
+                                Categorie = "Mobilier",
+                                Medium = "Marqueterie"
                             },
                             new Lot
                             {
@@ -233,11 +250,35 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanPresent.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "005",
+                                Artiste = "Orfèvre Français",
+                                Categorie = "Orfèvrerie",
+                                Medium = "Argent massif"
                             }
                         };
                         
                         _context.Lots.AddRange(lotsPresent);
+                        await _context.SaveChangesAsync();
+                        
+                        // Ajouter des photos pour les lots présents
+                        // Utiliser des images existantes de ImagesEncan234
+                        string[] imagesPresent = { "1_1.jpg", "2_1.jpg", "3_1.jpg", "4_1.jpg", "5_1.jpg" };
+                        int imageIndex = 0;
+                        foreach (var lot in lotsPresent)
+                        {
+                            var photos = new List<PhotoLot>
+                            {
+                                new PhotoLot
+                                {
+                                    CheminPhoto = $"/Images/ImagesEncan234/{imagesPresent[imageIndex % imagesPresent.Length]}",
+                                    LotId = lot.Id,
+                                    EstPrincipale = true
+                                }
+                            };
+                            _context.PhotoLots.AddRange(photos);
+                            imageIndex++;
+                        }
                     }
                     
                     // Lots pour l'encan futur
@@ -256,7 +297,11 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanFutur.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "100",
+                                Artiste = "Collection Historique",
+                                Categorie = "Philatélie",
+                                Medium = "Papier"
                             },
                             new Lot
                             {
@@ -269,7 +314,11 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanFutur.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "101",
+                                Artiste = "Sculpteur Art Déco",
+                                Categorie = "Sculpture",
+                                Medium = "Bronze"
                             },
                             new Lot
                             {
@@ -282,11 +331,35 @@ namespace Gamma2024.Server.Services
                                 EncanId = encanFutur.Id,
                                 VendeurId = vendeur.Id,
                                 EstActif = true,
-                                EstVendu = false
+                                EstVendu = false,
+                                Numero = "102",
+                                Artiste = "Divers Auteurs",
+                                Categorie = "Livres",
+                                Medium = "Papier et cuir"
                             }
                         };
                         
                         _context.Lots.AddRange(lotsFutur);
+                        await _context.SaveChangesAsync();
+                        
+                        // Ajouter des photos pour les lots futurs
+                        // Utiliser des images existantes de ImagesEncan235
+                        string[] imagesFutur = { "1_1.jfif", "2_1.jfif", "3_1.jfif" };
+                        int imageIndexFutur = 0;
+                        foreach (var lot in lotsFutur)
+                        {
+                            var photos = new List<PhotoLot>
+                            {
+                                new PhotoLot
+                                {
+                                    CheminPhoto = $"/Images/ImagesEncan235/{imagesFutur[imageIndexFutur % imagesFutur.Length]}",
+                                    LotId = lot.Id,
+                                    EstPrincipale = true
+                                }
+                            };
+                            _context.PhotoLots.AddRange(photos);
+                            imageIndexFutur++;
+                        }
                     }
                     
                     await _context.SaveChangesAsync();

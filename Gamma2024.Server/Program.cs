@@ -238,7 +238,8 @@ if (!app.Environment.IsDevelopment())
             Console.WriteLine("Migrations applied successfully.");
             
             // Vérifier si la BD est vide et seeder si nécessaire
-            if (!context.Users.Any())
+            // Force seeding if no encans exist (even if users exist)
+            if (!context.Users.Any() || !context.Encans.Any())
             {
                 Console.WriteLine("Database is empty, running seeder...");
                 seeder.SeedDatabaseAsync().GetAwaiter().GetResult();
