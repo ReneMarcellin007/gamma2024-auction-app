@@ -46,15 +46,25 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
             try
             {
+                Console.WriteLine($"Attempting to parse DATABASE_URL: {databaseUrl.Substring(0, Math.Min(30, databaseUrl.Length))}...");
+                
                 // Railway fournit DATABASE_URL au format: postgres://user:pass@host:port/database
-                var uri = new Uri(databaseUrl.Replace("postgres://", "postgresql://"));
+                // ou postgresql://user:pass@host:port/database
+                var urlToParse = databaseUrl;
+                if (databaseUrl.StartsWith("postgres://"))
+                {
+                    urlToParse = databaseUrl.Replace("postgres://", "postgresql://");
+                }
+                
+                var uri = new Uri(urlToParse);
                 var userInfo = uri.UserInfo.Split(':');
-                var username = userInfo[0];
-                var password = userInfo.Length > 1 ? userInfo[1] : "";
+                var username = Uri.UnescapeDataString(userInfo[0]);
+                var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
                 var host = uri.Host;
                 var port = uri.Port > 0 ? uri.Port : 5432;
                 var database = uri.AbsolutePath.TrimStart('/');
                 
+                // Handle special characters in password
                 connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
                 Console.WriteLine($"Parsed DATABASE_URL successfully");
                 Console.WriteLine($"Host: {host}, Port: {port}, Database: {database}, Username: {username}");
@@ -62,6 +72,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to parse DATABASE_URL: {ex.Message}");
+                Console.WriteLine($"Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 connectionString = "";
             }
         }
@@ -90,7 +102,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         }
             
         Console.WriteLine($"Final connection string length: {connectionString.Length} characters");
-        options.UseNpgsql(connectionString);
+        
+        try
+        {
+            options.UseNpgsql(connectionString);
+            Console.WriteLine("Successfully configured PostgreSQL connection");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR configuring PostgreSQL: {ex.Message}");
+            throw;
+        }
     }
 });
 
@@ -297,8 +319,18 @@ if (!app.Environment.IsDevelopment())
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error during database initialization: {ex.Message}");
+            Console.WriteLine($"CRITICAL ERROR during database initialization: {ex.Message}");
+            Console.WriteLine($"Exception type: {ex.GetType().Name}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                Console.WriteLine($"Inner exception type: {ex.InnerException.GetType().Name}");
+            }
+            
+            // Don't throw - let the app start even if DB init fails
+            // This allows us to see health endpoint errors
         }
     }
 }
@@ -338,6 +370,40 @@ if (!app.Environment.IsDevelopment())
     var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
     app.Urls.Add($"http://0.0.0.0:{port}");
 }
+
+// Health check endpoint pour tester la connexion DB
+app.MapGet("/api/health", async (ApplicationDbContext context) =>
+{
+    try
+    {
+        // Tester la connexion à la base de données
+        var canConnect = await context.Database.CanConnectAsync();
+        if (canConnect)
+        {
+            var userCount = await context.Users.CountAsync();
+            var encanCount = await context.Encans.CountAsync();
+            return Results.Ok(new 
+            { 
+                status = "healthy", 
+                database = "connected",
+                users = userCount,
+                encans = encanCount,
+                timestamp = DateTime.UtcNow 
+            });
+        }
+        return Results.Json(new { status = "unhealthy", database = "cannot connect" }, statusCode: 503);
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new 
+        { 
+            status = "unhealthy", 
+            database = "error",
+            error = ex.Message,
+            type = ex.GetType().Name
+        }, statusCode: 503);
+    }
+});
 
 app.MapHub<LotMiseHub>("/api/hub/lotMiseHub"); // Permet de mapper les requêtes vers SignalR
 app.MapHub<NotificationHub>("/api/hub/NotificationHub");
