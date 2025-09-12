@@ -315,8 +315,8 @@ using (var scope = app.Services.CreateScope())
             
             // Exécuter le seeder
             Console.WriteLine("Starting database seeding...");
-            await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
-            Console.WriteLine("Database seeding completed.");
+            // await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
+            Console.WriteLine("Database seeding skipped - DatabaseSeeder removed.");
         }
         else
         {
