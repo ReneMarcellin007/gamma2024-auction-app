@@ -704,7 +704,7 @@ namespace Gamma2024.Server.Services
                 }
 
                 // NOUVELLE VÉRIFICATION : Date de fin du décompte
-                if (lot.DateFinDecompteLot.HasValue && DateTime.Now > lot.DateFinDecompteLot.Value)
+                if (lot.DateFinDecompteLot.HasValue && DateTime.UtcNow > lot.DateFinDecompteLot.Value)
                 {
                     return (false, "Le temps pour miser sur ce lot est écoulé");
                 }
@@ -722,7 +722,7 @@ namespace Gamma2024.Server.Services
                     return (false, "Encan non trouvé");
                 }
 
-                var maintenant = DateTime.Now;
+                var maintenant = DateTime.UtcNow;
                 if (maintenant < encan.DateDebut)
                 {
                     return (false, "L'encan n'a pas encore commencé");
@@ -791,7 +791,7 @@ namespace Gamma2024.Server.Services
                         montant = mise.Montant
                     },
                     nombreMises = await _context.MiseAutomatiques.CountAsync(m => m.LotId == lot.Id),
-                    timestamp = DateTime.Now
+                    timestamp = DateTime.UtcNow
                 });
 
                 // Vérifier si le lot est en soirée de clôture
@@ -802,7 +802,7 @@ namespace Gamma2024.Server.Services
                     {
                         if (lot.DateFinDecompteLot.HasValue)
                         {
-                            var tempsRestant = (lot.DateFinDecompteLot.Value - DateTime.Now).TotalSeconds;
+                            var tempsRestant = (lot.DateFinDecompteLot.Value - DateTime.UtcNow).TotalSeconds;
                             if (tempsRestant < 60)
                             {
                                 lot.DateFinDecompteLot = lot.DateFinDecompteLot.Value.AddSeconds(encanLot.PasMise);
@@ -838,7 +838,7 @@ namespace Gamma2024.Server.Services
         private bool EstMiseValide(Lot lot, decimal miseActuelle, decimal nouvelleMise, decimal miseMaximale, bool estMiseAutomatique = false)
         {
             // Vérifier d'abord si le temps est écoulé
-            if (lot.DateFinDecompteLot.HasValue && DateTime.Now > lot.DateFinDecompteLot.Value)
+            if (lot.DateFinDecompteLot.HasValue && DateTime.UtcNow > lot.DateFinDecompteLot.Value)
             {
                 return false;
             }
@@ -919,7 +919,7 @@ namespace Gamma2024.Server.Services
             while (continuerMises)
             {
                 // Vérifier si le temps est écoulé
-                if (lot.DateFinDecompteLot.HasValue && DateTime.Now > lot.DateFinDecompteLot.Value)
+                if (lot.DateFinDecompteLot.HasValue && DateTime.UtcNow > lot.DateFinDecompteLot.Value)
                 {
                     break;
                 }
@@ -966,7 +966,7 @@ namespace Gamma2024.Server.Services
                     // Vérifier si le temps est écoulé et gérer le pas de mise
                     if (lot.DateFinDecompteLot.HasValue)
                     {
-                        var tempsRestant = (lot.DateFinDecompteLot.Value - DateTime.Now).TotalSeconds;
+                        var tempsRestant = (lot.DateFinDecompteLot.Value - DateTime.UtcNow).TotalSeconds;
                         if (tempsRestant <= -60)
                         {
                             // Ajouter le pas de mise
@@ -1107,7 +1107,7 @@ namespace Gamma2024.Server.Services
                 return;
             }
 
-            var maintenant = DateTime.Now;
+            var maintenant = DateTime.UtcNow;
             if (!lot.DateFinDecompteLot.HasValue || maintenant < lot.DateFinDecompteLot.Value)
             {
                 return;

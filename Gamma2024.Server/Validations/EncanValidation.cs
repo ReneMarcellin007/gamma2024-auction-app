@@ -18,9 +18,9 @@ namespace Gamma2024.Server.Validations
                 return (false, "La date de début est obligatoire.");
             }
 
-            if (model.DateDebut < DateTime.Now.AddMinutes(-1))
+            if (model.DateDebut < DateTime.UtcNow.AddMinutes(-1))
             {
-                Console.Write(DateTime.Now.AddMinutes(-1));
+                Console.Write(DateTime.UtcNow.AddMinutes(-1));
                 return (false, "La date de début ne peut pas être avant la date d'aujourd'hui.");
             }
 

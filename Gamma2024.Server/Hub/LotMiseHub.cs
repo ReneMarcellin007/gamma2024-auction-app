@@ -32,7 +32,7 @@ namespace Gamma2024.Server.Hub
                 idLot = lotId,
                 montant = amount,
                 userId = userId,
-                timestamp = DateTime.Now
+                timestamp = DateTime.UtcNow
             });
 
             // Récupérer l'historique des mises pour ce lot

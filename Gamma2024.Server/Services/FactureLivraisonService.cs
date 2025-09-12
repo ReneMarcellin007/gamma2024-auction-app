@@ -91,7 +91,7 @@ namespace Gamma2024.Server.Services
                         IdFacture = choix.IdFacture,
                         Facture = _context.Factures.Include(f => f.Lots).Include(f => f.Client.Adresses).First(f => f.Id == choix.IdFacture),
                         IdCharite = choix.IdCharite,
-                        DateAchat = DateTime.Now,
+                        DateAchat = DateTime.UtcNow,
                         IdAdresse = adresse.Id,
                         Adresse = adresse
                     };
@@ -104,7 +104,7 @@ namespace Gamma2024.Server.Services
                         Facture = _context.Factures.Include(f => f.Lots).Include(f => f.Client.Adresses).First(f => f.Id == choix.IdFacture),
                         IdAdresse = choix.IdAdresse.Value,
                         IdCharite = choix.IdCharite,
-                        DateAchat = DateTime.Now,
+                        DateAchat = DateTime.UtcNow,
                     };
                 }
 

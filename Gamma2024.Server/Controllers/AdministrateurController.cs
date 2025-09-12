@@ -63,7 +63,7 @@ namespace Gamma2024.Server.Controllers
 
             var result1 = await _userManager.SetLockoutEnabledAsync(user, true);
 
-            var result2 = await _userManager.SetLockoutEndDateAsync(user, DateTime.Now.AddYears(1000));
+            var result2 = await _userManager.SetLockoutEndDateAsync(user, DateTime.UtcNow.AddYears(1000));
 
             if (!result1.Succeeded || !result2.Succeeded)
             {

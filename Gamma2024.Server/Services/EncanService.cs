@@ -176,7 +176,7 @@ namespace Gamma2024.Server.Services
         public EncanAffichageVM ChercherEncanEnCours()
         {
             var encan = _context.Encans
-                .FirstOrDefault(e => DateTime.Now < e.DateFin && DateTime.Now > e.DateDebut);
+                .FirstOrDefault(e => DateTime.UtcNow < e.DateFin && DateTime.UtcNow > e.DateDebut);
 
             if (encan != null && encan.EstPublie)
             {
@@ -197,7 +197,7 @@ namespace Gamma2024.Server.Services
         public int ChercherNumeroEncanEnCours()
         {
             var encan = _context.Encans
-                .FirstOrDefault(e => DateTime.Now < e.DateFin && DateTime.Now > e.DateDebut);
+                .FirstOrDefault(e => DateTime.UtcNow < e.DateFin && DateTime.UtcNow > e.DateDebut);
 
             if (encan != null && encan.EstPublie)
             {
@@ -211,7 +211,7 @@ namespace Gamma2024.Server.Services
         public ICollection<EncanAffichageVM> ChercherEncansFuturs()
         {
             var encans = _context.Encans
-                .Where(e => DateTime.Now < e.DateDebut)
+                .Where(e => DateTime.UtcNow < e.DateDebut)
                 .Where(e => e.EstPublie == true)
                 .OrderBy(e => e.DateDebut)
                 .ToList()
@@ -231,7 +231,7 @@ namespace Gamma2024.Server.Services
         public ICollection<EncanAffichageVM> ChercherEncansPasses()
         {
             var encans = _context.Encans
-                .Where(e => e.EstPublie == true && DateTime.Now > e.DateFin)
+                .Where(e => e.EstPublie == true && DateTime.UtcNow > e.DateFin)
                 .OrderByDescending(e => e.DateFin)
                 .ToList()
                 .Select(e => new EncanAffichageVM
@@ -249,7 +249,7 @@ namespace Gamma2024.Server.Services
 
         public async Task<(string type, Encan encan)> GetEtatCourant()
         {
-            var maintenant = DateTime.Now;
+            var maintenant = DateTime.UtcNow;
 
             var dernierEncan = await _context.Encans
                 .Include(e => e.EncanLots)

@@ -15,7 +15,7 @@ namespace Gamma2024.Server.Models
 
         public bool EstEnSoireeCloture()
         {
-            var maintenant = DateTime.Now;
+            var maintenant = DateTime.UtcNow;
             return maintenant >= DateDebutSoireeCloture && 
                    EncanLots.Any(el => !el.Lot.EstVendu && el.Lot.DateFinDecompteLot > maintenant);
         }

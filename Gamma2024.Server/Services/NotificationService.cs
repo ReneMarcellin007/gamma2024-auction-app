@@ -23,7 +23,7 @@ namespace Gamma2024.Server.Services
             {
                 ApplicationUserId = userReceiptId,
                 Message = message,
-                CreeA = DateTime.Now,
+                CreeA = DateTime.UtcNow,
                 EstLu = false
             };
 

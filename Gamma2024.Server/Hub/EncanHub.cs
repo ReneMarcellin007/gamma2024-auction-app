@@ -30,7 +30,7 @@ namespace Gamma2024.Server.Hub
             try
             {
                 var lots = await _context.Lots
-                    .Where(l => !l.EstVendu && l.DateFinDecompteLot > DateTime.Now)
+                    .Where(l => !l.EstVendu && l.DateFinDecompteLot > DateTime.UtcNow)
                     .ToDictionaryAsync(
                         l => l.Id,
                         l => l.DateFinDecompteLot.Value
