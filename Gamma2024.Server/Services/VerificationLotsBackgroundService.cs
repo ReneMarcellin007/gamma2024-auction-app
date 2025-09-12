@@ -35,7 +35,7 @@ namespace Gamma2024.Server.Services
                         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                         var lotService = scope.ServiceProvider.GetRequiredService<LotService>();
 
-                        var maintenant = DateTime.Now;
+                        var maintenant = DateTime.UtcNow;
 
                         // Chercher les encans qui devraient être terminés
                         var encansAVerifier = await context.Encans

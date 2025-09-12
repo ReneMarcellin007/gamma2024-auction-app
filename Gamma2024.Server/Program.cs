@@ -308,33 +308,22 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Database connection successful.");
             
-            // Obtenir les migrations pendantes
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
+            // FORCER LA RECRÉATION COMPLÈTE EN PRODUCTION
+            Console.WriteLine("FORCING COMPLETE DATABASE RECREATION!");
+            try 
             {
-                Console.WriteLine($"Found {pendingMigrations.Count()} pending migrations:");
-                foreach (var migration in pendingMigrations)
-                {
-                    Console.WriteLine($"  - {migration}");
-                }
+                Console.WriteLine("Deleting existing database...");
+                await context.Database.EnsureDeletedAsync();
+                Console.WriteLine("Database deleted.");
+            }
+            catch (Exception delEx)
+            {
+                Console.WriteLine($"Could not delete database: {delEx.Message}");
             }
             
-            // Appliquer les migrations
-            Console.WriteLine("Applying database migrations...");
-            try
-            {
-                await context.Database.MigrateAsync();
-                Console.WriteLine("Migrations applied successfully.");
-            }
-            catch (Exception migEx)
-            {
-                Console.WriteLine($"Migration error: {migEx.Message}");
-                // En cas d'erreur, essayer de recréer la base de données
-                Console.WriteLine("Attempting to recreate database schema...");
-                await context.Database.EnsureDeletedAsync();
-                await context.Database.MigrateAsync();
-                Console.WriteLine("Database recreated with migrations.");
-            }
+            Console.WriteLine("Creating fresh database with schema...");
+            await context.Database.EnsureCreatedAsync();
+            Console.WriteLine("Database created with all tables!");
             
             // Créer les rôles de base s'ils n'existent pas
             Console.WriteLine("Creating default roles...");
