@@ -38,11 +38,37 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         Console.WriteLine($"PGUSER: {Environment.GetEnvironmentVariable("PGUSER")}");
         Console.WriteLine($"PGPASSWORD: {Environment.GetEnvironmentVariable("PGPASSWORD")}");
         
-        // Essayer de construire une connection string à partir des variables individuelles si DATABASE_URL n'existe pas
-        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+        // Essayer de construire une connection string à partir des variables
+        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        var connectionString = "";
+        
+        if (!string.IsNullOrEmpty(databaseUrl))
+        {
+            try
+            {
+                // Railway fournit DATABASE_URL au format: postgres://user:pass@host:port/database
+                var uri = new Uri(databaseUrl.Replace("postgres://", "postgresql://"));
+                var userInfo = uri.UserInfo.Split(':');
+                var username = userInfo[0];
+                var password = userInfo.Length > 1 ? userInfo[1] : "";
+                var host = uri.Host;
+                var port = uri.Port > 0 ? uri.Port : 5432;
+                var database = uri.AbsolutePath.TrimStart('/');
+                
+                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
+                Console.WriteLine($"Parsed DATABASE_URL successfully");
+                Console.WriteLine($"Host: {host}, Port: {port}, Database: {database}, Username: {username}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to parse DATABASE_URL: {ex.Message}");
+                connectionString = "";
+            }
+        }
         
         if (string.IsNullOrEmpty(connectionString))
         {
+            // Fallback: construire à partir des variables individuelles
             var host = Environment.GetEnvironmentVariable("PGHOST");
             var port = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
             var database = Environment.GetEnvironmentVariable("PGDATABASE");
@@ -51,16 +77,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             
             if (!string.IsNullOrEmpty(host) && !string.IsNullOrEmpty(database) && !string.IsNullOrEmpty(username))
             {
-                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
-                Console.WriteLine($"Built connection string from individual vars: {connectionString}");
+                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
+                Console.WriteLine($"Built connection string from individual vars");
+                Console.WriteLine($"Host: {host}, Port: {port}, Database: {database}, Username: {username}");
             }
         }
         
-        connectionString = connectionString 
-            ?? builder.Configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("No database connection string found.");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("No database connection string found.");
+        }
             
-        Console.WriteLine($"Using connection string: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
+        Console.WriteLine($"Final connection string length: {connectionString.Length} characters");
         options.UseNpgsql(connectionString);
     }
 });
