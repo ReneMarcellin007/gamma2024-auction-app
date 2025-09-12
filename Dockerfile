@@ -37,6 +37,7 @@ RUN mkdir -p /tmp/backup && \
     mkdir -p /src/Gamma2024.Server/wwwroot && \
     rm -f dist/favicon.ico && \
     rm -rf dist/icons && \
+    rm -rf dist/images && \
     cp -r dist/* /src/Gamma2024.Server/wwwroot/ && \
     cp -r /tmp/backup/Images /src/Gamma2024.Server/wwwroot/ 2>/dev/null || true
 
