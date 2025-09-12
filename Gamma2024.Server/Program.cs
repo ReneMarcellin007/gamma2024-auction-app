@@ -308,15 +308,67 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Database connection successful.");
             
+            // Obtenir les migrations pendantes
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                Console.WriteLine($"Found {pendingMigrations.Count()} pending migrations:");
+                foreach (var migration in pendingMigrations)
+                {
+                    Console.WriteLine($"  - {migration}");
+                }
+            }
+            
             // Appliquer les migrations
             Console.WriteLine("Applying database migrations...");
-            await context.Database.MigrateAsync();
-            Console.WriteLine("Migrations applied successfully.");
+            try
+            {
+                await context.Database.MigrateAsync();
+                Console.WriteLine("Migrations applied successfully.");
+            }
+            catch (Exception migEx)
+            {
+                Console.WriteLine($"Migration error: {migEx.Message}");
+                // En cas d'erreur, essayer de recréer la base de données
+                Console.WriteLine("Attempting to recreate database schema...");
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.MigrateAsync();
+                Console.WriteLine("Database recreated with migrations.");
+            }
             
-            // Exécuter le seeder
-            Console.WriteLine("Starting database seeding...");
-            // await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
-            Console.WriteLine("Database seeding skipped - DatabaseSeeder removed.");
+            // Créer les rôles de base s'ils n'existent pas
+            Console.WriteLine("Creating default roles...");
+            string[] roles = { "Admin", "Client", "Vendeur" };
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                    Console.WriteLine($"Role '{role}' created.");
+                }
+            }
+            
+            // Créer un admin par défaut s'il n'existe pas
+            var adminEmail = "admin@encans.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true
+                };
+                
+                var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    Console.WriteLine("Admin user created.");
+                }
+            }
+            
+            Console.WriteLine("Database seeding completed.");
         }
         else
         {
