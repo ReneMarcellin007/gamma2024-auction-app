@@ -38,67 +38,73 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         Console.WriteLine($"PGUSER: {Environment.GetEnvironmentVariable("PGUSER")}");
         Console.WriteLine($"PGPASSWORD: {Environment.GetEnvironmentVariable("PGPASSWORD")}");
         
-        // Essayer de construire une connection string à partir des variables
-        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        // Railway fournit DATABASE_URL et des variables PG individuelles
         var connectionString = "";
         
-        if (!string.IsNullOrEmpty(databaseUrl))
-        {
-            try
-            {
-                Console.WriteLine($"Attempting to parse DATABASE_URL: {databaseUrl.Substring(0, Math.Min(30, databaseUrl.Length))}...");
-                
-                // Railway fournit DATABASE_URL au format: postgres://user:pass@host:port/database
-                // ou postgresql://user:pass@host:port/database
-                var urlToParse = databaseUrl;
-                if (databaseUrl.StartsWith("postgres://"))
-                {
-                    urlToParse = databaseUrl.Replace("postgres://", "postgresql://");
-                }
-                
-                var uri = new Uri(urlToParse);
-                var userInfo = uri.UserInfo.Split(':');
-                var username = Uri.UnescapeDataString(userInfo[0]);
-                var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
-                var host = uri.Host;
-                var port = uri.Port > 0 ? uri.Port : 5432;
-                var database = uri.AbsolutePath.TrimStart('/');
-                
-                // Handle special characters in password
-                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
-                Console.WriteLine($"Parsed DATABASE_URL successfully");
-                Console.WriteLine($"Host: {host}, Port: {port}, Database: {database}, Username: {username}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to parse DATABASE_URL: {ex.Message}");
-                Console.WriteLine($"Exception type: {ex.GetType().Name}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                connectionString = "";
-            }
-        }
+        // Essayer d'abord avec les variables PG individuelles (plus fiables sur Railway)
+        var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+        var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+        var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
+        var pgUser = Environment.GetEnvironmentVariable("PGUSER");
+        var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
         
-        if (string.IsNullOrEmpty(connectionString))
+        Console.WriteLine("=== PostgreSQL Environment Variables ===");
+        Console.WriteLine($"PGHOST: {(!string.IsNullOrEmpty(pgHost) ? "Set" : "Not set")}");
+        Console.WriteLine($"PGPORT: {pgPort}");
+        Console.WriteLine($"PGDATABASE: {(!string.IsNullOrEmpty(pgDatabase) ? "Set" : "Not set")}");
+        Console.WriteLine($"PGUSER: {(!string.IsNullOrEmpty(pgUser) ? "Set" : "Not set")}");
+        Console.WriteLine($"PGPASSWORD: {(!string.IsNullOrEmpty(pgPassword) ? "Set" : "Not set")}");
+        
+        if (!string.IsNullOrEmpty(pgHost) && !string.IsNullOrEmpty(pgDatabase) && 
+            !string.IsNullOrEmpty(pgUser) && !string.IsNullOrEmpty(pgPassword))
         {
-            // Fallback: construire à partir des variables individuelles
-            var host = Environment.GetEnvironmentVariable("PGHOST");
-            var port = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
-            var database = Environment.GetEnvironmentVariable("PGDATABASE");
-            var username = Environment.GetEnvironmentVariable("PGUSER");
-            var password = Environment.GetEnvironmentVariable("PGPASSWORD");
+            connectionString = $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SslMode=Require;Trust Server Certificate=true";
+            Console.WriteLine("Connection string built from PG environment variables.");
+        }
+        else
+        {
+            // Fallback: essayer DATABASE_URL
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            Console.WriteLine($"DATABASE_URL: {(!string.IsNullOrEmpty(databaseUrl) ? "Set" : "Not set")}");
             
-            if (!string.IsNullOrEmpty(host) && !string.IsNullOrEmpty(database) && !string.IsNullOrEmpty(username))
+            if (!string.IsNullOrEmpty(databaseUrl))
             {
-                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
-                Console.WriteLine($"Built connection string from individual vars");
-                Console.WriteLine($"Host: {host}, Port: {port}, Database: {database}, Username: {username}");
+                try
+                {
+                    // Convertir postgres:// en postgresql://
+                    var urlToParse = databaseUrl.Replace("postgres://", "postgresql://");
+                    var uri = new Uri(urlToParse);
+                    
+                    // Extraire les composants
+                    var userInfo = uri.UserInfo.Split(':');
+                    var username = Uri.UnescapeDataString(userInfo[0]);
+                    var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+                    var host = uri.Host;
+                    var port = uri.Port > 0 ? uri.Port : 5432;
+                    var database = uri.AbsolutePath.TrimStart('/');
+                    
+                    connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
+                    Console.WriteLine("Connection string built from DATABASE_URL.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to parse DATABASE_URL: {ex.Message}");
+                }
             }
         }
         
         if (string.IsNullOrEmpty(connectionString))
         {
-            connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("No database connection string found.");
+            // Dernier recours: utiliser la configuration locale
+            connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                Console.WriteLine("Using connection string from appsettings.");
+            }
+            else
+            {
+                throw new InvalidOperationException("No valid database connection string found!");
+            }
         }
             
         Console.WriteLine($"Final connection string length: {connectionString.Length} characters");
@@ -271,67 +277,52 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Auto-migration et seeding en production
-if (!app.Environment.IsDevelopment())
+// Auto-migration et seeding
+using (var scope = app.Services.CreateScope())
 {
-    Console.WriteLine("=== Running database migration and seeding for production ===");
-    using (var scope = app.Services.CreateScope())
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    Console.WriteLine("=== Database initialization ===");
+    Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
+    
+    try
     {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        
-        try
+        // Tester la connexion
+        if (await context.Database.CanConnectAsync())
         {
+            Console.WriteLine("Database connection successful.");
+            
             // Appliquer les migrations
             Console.WriteLine("Applying database migrations...");
-            context.Database.Migrate();
+            await context.Database.MigrateAsync();
             Console.WriteLine("Migrations applied successfully.");
             
-            // Créer les rôles de base
-            string[] roleNames = { "Admin", "Client", "Vendeur" };
-            foreach (var roleName in roleNames)
-            {
-                if (!roleManager.RoleExistsAsync(roleName).GetAwaiter().GetResult())
-                {
-                    roleManager.CreateAsync(new IdentityRole(roleName)).GetAwaiter().GetResult();
-                    Console.WriteLine($"Role '{roleName}' created.");
-                }
-            }
-            
-            // Créer un utilisateur admin par défaut si aucun n'existe
-            if (!context.Users.Any())
-            {
-                var admin = new ApplicationUser
-                {
-                    UserName = "admin@admin.com",
-                    Email = "admin@admin.com",
-                    EmailConfirmed = true
-                };
-                
-                var result = userManager.CreateAsync(admin, "Admin123!").GetAwaiter().GetResult();
-                if (result.Succeeded)
-                {
-                    userManager.AddToRoleAsync(admin, "Admin").GetAwaiter().GetResult();
-                    Console.WriteLine("Admin user created successfully.");
-                }
-            }
+            // Exécuter le seeder
+            Console.WriteLine("Starting database seeding...");
+            await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
+            Console.WriteLine("Database seeding completed.");
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine($"CRITICAL ERROR during database initialization: {ex.Message}");
-            Console.WriteLine($"Exception type: {ex.GetType().Name}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
-                Console.WriteLine($"Inner exception type: {ex.InnerException.GetType().Name}");
-            }
-            
-            // Don't throw - let the app start even if DB init fails
-            // This allows us to see health endpoint errors
+            Console.WriteLine("ERROR: Cannot connect to database!");
         }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"CRITICAL ERROR during database initialization: {ex.Message}");
+        Console.WriteLine($"Exception type: {ex.GetType().Name}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+            Console.WriteLine($"Inner exception type: {ex.InnerException.GetType().Name}");
+        }
+        
+        // Don't throw - let the app start even if DB init fails
+        // This allows us to see health endpoint errors
     }
 }
 
