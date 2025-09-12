@@ -28,15 +28,16 @@ COPY . .
 # Build Vue.js frontend manually
 WORKDIR /src/gamma2024.client
 RUN npm install
+# Use Railway environment file for production build
+COPY gamma2024.client/.env.railway .env.production
 RUN npm run build:railway
 
-# Backup Images folder, clear wwwroot completely, copy Vue.js build (keep images folder for logo), restore Images
+# Backup Images folder, clear wwwroot completely, copy Vue.js build (keep images and icons folders), restore Images
 RUN mkdir -p /tmp/backup && \
     cp -r /src/Gamma2024.Server/wwwroot/Images /tmp/backup/ 2>/dev/null || true && \
     rm -rf /src/Gamma2024.Server/wwwroot && \
     mkdir -p /src/Gamma2024.Server/wwwroot && \
     rm -f dist/favicon.ico && \
-    rm -rf dist/icons && \
     cp -r dist/* /src/Gamma2024.Server/wwwroot/ && \
     cp -r /tmp/backup/Images /src/Gamma2024.Server/wwwroot/ 2>/dev/null || true
 
