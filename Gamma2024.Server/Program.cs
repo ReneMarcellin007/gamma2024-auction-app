@@ -38,58 +38,72 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         Console.WriteLine($"PGUSER: {Environment.GetEnvironmentVariable("PGUSER")}");
         Console.WriteLine($"PGPASSWORD: {Environment.GetEnvironmentVariable("PGPASSWORD")}");
         
-        // Railway fournit DATABASE_URL et des variables PG individuelles
+        // Railway fournit DATABASE_PUBLIC_URL ou DATABASE_URL
         var connectionString = "";
         
-        // Essayer d'abord avec les variables PG individuelles (plus fiables sur Railway)
-        var pgHost = Environment.GetEnvironmentVariable("PGHOST");
-        var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
-        var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
-        var pgUser = Environment.GetEnvironmentVariable("PGUSER");
-        var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
+        // Essayer DATABASE_PUBLIC_URL en premier (Railway l'utilise)
+        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL") 
+                       ?? Environment.GetEnvironmentVariable("DATABASE_URL");
         
-        Console.WriteLine("=== PostgreSQL Environment Variables ===");
-        Console.WriteLine($"PGHOST: {(!string.IsNullOrEmpty(pgHost) ? "Set" : "Not set")}");
-        Console.WriteLine($"PGPORT: {pgPort}");
-        Console.WriteLine($"PGDATABASE: {(!string.IsNullOrEmpty(pgDatabase) ? "Set" : "Not set")}");
-        Console.WriteLine($"PGUSER: {(!string.IsNullOrEmpty(pgUser) ? "Set" : "Not set")}");
-        Console.WriteLine($"PGPASSWORD: {(!string.IsNullOrEmpty(pgPassword) ? "Set" : "Not set")}");
+        Console.WriteLine("=== Railway Database Configuration ===");
+        Console.WriteLine($"DATABASE_PUBLIC_URL: {(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL")) ? "Set" : "Not set")}");
+        Console.WriteLine($"DATABASE_URL: {(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_URL")) ? "Set" : "Not set")}");
         
-        if (!string.IsNullOrEmpty(pgHost) && !string.IsNullOrEmpty(pgDatabase) && 
-            !string.IsNullOrEmpty(pgUser) && !string.IsNullOrEmpty(pgPassword))
+        if (!string.IsNullOrEmpty(databaseUrl))
         {
-            connectionString = $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SslMode=Require;Trust Server Certificate=true";
-            Console.WriteLine("Connection string built from PG environment variables.");
+            try
+            {
+                Console.WriteLine($"Parsing database URL...");
+                
+                // Convertir postgres:// en postgresql://
+                var urlToParse = databaseUrl;
+                if (databaseUrl.StartsWith("postgres://"))
+                {
+                    urlToParse = databaseUrl.Replace("postgres://", "postgresql://");
+                }
+                
+                var uri = new Uri(urlToParse);
+                
+                // Extraire les composants
+                var userInfo = uri.UserInfo.Split(':');
+                var username = Uri.UnescapeDataString(userInfo[0]);
+                var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+                var host = uri.Host;
+                var port = uri.Port > 0 ? uri.Port : 5432;
+                var database = uri.AbsolutePath.TrimStart('/');
+                
+                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
+                Console.WriteLine($"Database connection configured:");
+                Console.WriteLine($"  Host: {host}");
+                Console.WriteLine($"  Port: {port}");
+                Console.WriteLine($"  Database: {database}");
+                Console.WriteLine($"  Username: {username}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to parse database URL: {ex.Message}");
+                Console.WriteLine($"Exception type: {ex.GetType().Name}");
+            }
         }
         else
         {
-            // Fallback: essayer DATABASE_URL
-            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-            Console.WriteLine($"DATABASE_URL: {(!string.IsNullOrEmpty(databaseUrl) ? "Set" : "Not set")}");
+            // Fallback: essayer les variables PG individuelles
+            var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+            var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+            var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
+            var pgUser = Environment.GetEnvironmentVariable("PGUSER");
+            var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
             
-            if (!string.IsNullOrEmpty(databaseUrl))
+            Console.WriteLine("Checking individual PG variables:");
+            Console.WriteLine($"  PGHOST: {(!string.IsNullOrEmpty(pgHost) ? "Set" : "Not set")}");
+            Console.WriteLine($"  PGDATABASE: {(!string.IsNullOrEmpty(pgDatabase) ? "Set" : "Not set")}");
+            Console.WriteLine($"  PGUSER: {(!string.IsNullOrEmpty(pgUser) ? "Set" : "Not set")}");
+            
+            if (!string.IsNullOrEmpty(pgHost) && !string.IsNullOrEmpty(pgDatabase) && 
+                !string.IsNullOrEmpty(pgUser) && !string.IsNullOrEmpty(pgPassword))
             {
-                try
-                {
-                    // Convertir postgres:// en postgresql://
-                    var urlToParse = databaseUrl.Replace("postgres://", "postgresql://");
-                    var uri = new Uri(urlToParse);
-                    
-                    // Extraire les composants
-                    var userInfo = uri.UserInfo.Split(':');
-                    var username = Uri.UnescapeDataString(userInfo[0]);
-                    var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
-                    var host = uri.Host;
-                    var port = uri.Port > 0 ? uri.Port : 5432;
-                    var database = uri.AbsolutePath.TrimStart('/');
-                    
-                    connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SslMode=Require;Trust Server Certificate=true";
-                    Console.WriteLine("Connection string built from DATABASE_URL.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to parse DATABASE_URL: {ex.Message}");
-                }
+                connectionString = $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SslMode=Require;Trust Server Certificate=true";
+                Console.WriteLine("Connection string built from PG environment variables.");
             }
         }
         
