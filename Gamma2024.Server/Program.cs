@@ -93,6 +93,7 @@ builder.Services.AddScoped<LotService>();
 builder.Services.AddScoped<FactureService>();
 builder.Services.AddScoped<FactureLivraisonService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<DatabaseSeederService>();
 builder.Services.AddHostedService<VerificationLotsBackgroundService>();
 
 builder.Services.Configure<EmailConfiguration>(
@@ -220,16 +221,40 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Auto-migration en production - TEMPORAIREMENT DÉSACTIVÉ POUR DEBUG
+// Auto-migration et seeding en production
 if (!app.Environment.IsDevelopment())
 {
-    Console.WriteLine("=== DEBUG: Production environment detected, but skipping migration for now ===");
-    // DÉSACTIVÉ TEMPORAIREMENT POUR DEBUG
-    // using (var scope = app.Services.CreateScope())
-    // {
-    //     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //     context.Database.Migrate();
-    // }
+    Console.WriteLine("=== Running database migration and seeding for production ===");
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeederService>();
+        
+        try
+        {
+            // Appliquer les migrations
+            Console.WriteLine("Applying database migrations...");
+            context.Database.Migrate();
+            Console.WriteLine("Migrations applied successfully.");
+            
+            // Vérifier si la BD est vide et seeder si nécessaire
+            if (!context.Users.Any())
+            {
+                Console.WriteLine("Database is empty, running seeder...");
+                seeder.SeedDatabaseAsync().GetAwaiter().GetResult();
+                Console.WriteLine("Database seeding completed successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Database already contains data, skipping seeding.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during database initialization: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
+    }
 }
 
 if (app.Environment.IsDevelopment())
