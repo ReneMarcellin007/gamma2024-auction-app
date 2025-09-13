@@ -30,8 +30,12 @@ namespace Gamma2024.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginVM model)
         {
+            _logger.LogInformation($"=== LOGIN ATTEMPT ===");
+            _logger.LogInformation($"Email/Username: {model?.EmailOuPseudo}");
+            
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("ModelState is invalid");
                 return BadRequest(ModelState);
             }
 

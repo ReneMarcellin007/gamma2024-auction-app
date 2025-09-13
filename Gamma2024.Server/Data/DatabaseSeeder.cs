@@ -10,21 +10,30 @@ namespace Gamma2024.Server.Data
     {
         public static void SeedDatabase(IServiceProvider serviceProvider)
         {
-            using var context = new ApplicationDbContext(
-                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
+            try
+            {
+                using var context = new ApplicationDbContext(
+                    serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
 
-            Console.WriteLine("=== FORCER LA RECRÉATION DES DONNÉES ===");
-            
-            // Supprimer toutes les données existantes pour forcer la recréation
-            context.EncanLots.RemoveRange(context.EncanLots);
-            context.Photos.RemoveRange(context.Photos);
-            context.Lots.RemoveRange(context.Lots);
-            context.Encans.RemoveRange(context.Encans);
-            context.Vendeurs.RemoveRange(context.Vendeurs);
-            context.Categories.RemoveRange(context.Categories);
-            context.Mediums.RemoveRange(context.Mediums);
-            context.SaveChanges();
-            Console.WriteLine("Toutes les données existantes ont été supprimées.");
+                Console.WriteLine("=== DÉBUT DU SEEDER ===");
+                
+                // Ne supprimer que si les tables existent déjà
+                try
+                {
+                    if (context.EncanLots.Any()) context.EncanLots.RemoveRange(context.EncanLots);
+                    if (context.Photos.Any()) context.Photos.RemoveRange(context.Photos);
+                    if (context.Lots.Any()) context.Lots.RemoveRange(context.Lots);
+                    if (context.Encans.Any()) context.Encans.RemoveRange(context.Encans);
+                    if (context.Vendeurs.Any()) context.Vendeurs.RemoveRange(context.Vendeurs);
+                    if (context.Categories.Any()) context.Categories.RemoveRange(context.Categories);
+                    if (context.Mediums.Any()) context.Mediums.RemoveRange(context.Mediums);
+                    context.SaveChanges();
+                    Console.WriteLine("Données existantes supprimées.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Pas de données à supprimer ou erreur: {ex.Message}");
+                }
 
             // Ajouter les catégories
             var categories = new[]
@@ -235,8 +244,20 @@ namespace Gamma2024.Server.Data
             context.Photos.AddRange(photos);
             context.SaveChanges();
 
-            Console.WriteLine("Base de données initialisée avec succès!");
-            VerifierDonnees(context);
+                Console.WriteLine("Base de données initialisée avec succès!");
+                VerifierDonnees(context);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERREUR CRITIQUE DANS LE SEEDER: {ex.Message}");
+                Console.WriteLine($"Type: {ex.GetType().Name}");
+                Console.WriteLine($"Stack: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                throw;
+            }
         }
 
         public static void VerifierDonnees(ApplicationDbContext context)

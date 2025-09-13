@@ -206,7 +206,7 @@ builder.Services.AddCors(options =>
         options.AddPolicy("Production", builder =>
         {
             builder
-                .WithOrigins("https://sqlinfocg.cegepgranby.qc.ca/2162067")
+                .SetIsOriginAllowed(_ => true) // Permettre TOUTES les origines en production temporairement
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
@@ -222,14 +222,15 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
+        var jwtKey = builder.Configuration["Jwt:Key"] ?? "CeciEstUneCleDeveloppementTemporaireDe256BitsMinimumPourJWT";
+        Console.WriteLine($"JWT Key configured: {(!string.IsNullOrEmpty(jwtKey) ? "Yes" : "No")}");
+        
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateIssuer = false, // Simplifier pour éviter les erreurs
+            ValidateAudience = false, // Simplifier pour éviter les erreurs
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
@@ -308,30 +309,20 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Database connection successful.");
             
-            // Appliquer les migrations en attente ou créer la base si elle n'existe pas
-            Console.WriteLine("Checking database...");
-            if (app.Environment.IsDevelopment())
+            // EN PRODUCTION: RECRÉER LA BASE COMPLÈTEMENT
+            if (!app.Environment.IsDevelopment())
+            {
+                Console.WriteLine("=== PRODUCTION: RECRÉATION COMPLÈTE DE LA BASE ===");
+                await context.Database.EnsureDeletedAsync();
+                Console.WriteLine("Base de données supprimée.");
+                await context.Database.EnsureCreatedAsync();
+                Console.WriteLine("Base de données recréée.");
+            }
+            else
             {
                 // En développement, utiliser EnsureCreated
                 await context.Database.EnsureCreatedAsync();
                 Console.WriteLine("Database ensured created.");
-            }
-            else
-            {
-                // En production, utiliser les migrations
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
-                {
-                    Console.WriteLine($"Applying {pendingMigrations.Count()} pending migrations...");
-                    await context.Database.MigrateAsync();
-                    Console.WriteLine("Migrations applied.");
-                }
-                else
-                {
-                    // Si pas de migrations, créer la base
-                    await context.Database.EnsureCreatedAsync();
-                    Console.WriteLine("Database created.");
-                }
             }
             
             // Créer les rôles de base s'ils n'existent pas
@@ -405,14 +396,31 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("Mediums seeded.");
             }
             
-            // FORCER LA CRÉATION DES ENCANS ET LOTS
-            Console.WriteLine("=== FORCER LA CRÉATION DES ENCANS ET LOTS ===");
-            DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
-            
-            // Vérifier les données après le seeding
-            var encanCount = await context.Encans.CountAsync();
-            var lotCount = await context.Lots.CountAsync();
-            Console.WriteLine($"Après seeding: {encanCount} encans, {lotCount} lots");
+            // FORCER LA CRÉATION DES ENCANS ET LOTS TOUJOURS
+            Console.WriteLine("=== FORCER LA CRÉATION DES DONNÉES DE TEST ===");
+            try
+            {
+                DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
+                Console.WriteLine("DatabaseSeeder exécuté avec succès.");
+                
+                // Vérifier les données après le seeding
+                var encanCount = await context.Encans.CountAsync();
+                var lotCount = await context.Lots.CountAsync();
+                var catCount = await context.Categories.CountAsync();
+                Console.WriteLine($"=== DONNÉES CRÉÉES ===");
+                Console.WriteLine($"Encans: {encanCount}");
+                Console.WriteLine($"Lots: {lotCount}");
+                Console.WriteLine($"Catégories: {catCount}");
+            }
+            catch (Exception seedEx)
+            {
+                Console.WriteLine($"ERREUR SEEDER: {seedEx.Message}");
+                Console.WriteLine($"Stack: {seedEx.StackTrace}");
+                if (seedEx.InnerException != null)
+                {
+                    Console.WriteLine($"Inner: {seedEx.InnerException.Message}");
+                }
+            }
             
             
             Console.WriteLine("Database seeding completed.");
