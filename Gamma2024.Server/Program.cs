@@ -360,6 +360,118 @@ using (var scope = app.Services.CreateScope())
                 }
             }
             
+            // Seed Categories if none exist
+            if (!await context.Categories.AnyAsync())
+            {
+                var categories = new[]
+                {
+                    new Categorie { Nom = "Peinture" },
+                    new Categorie { Nom = "Sculpture" },
+                    new Categorie { Nom = "Photographie" },
+                    new Categorie { Nom = "Art numérique" },
+                    new Categorie { Nom = "Dessin" }
+                };
+                context.Categories.AddRange(categories);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Categories seeded.");
+            }
+            
+            // Seed Mediums if none exist
+            if (!await context.Mediums.AnyAsync())
+            {
+                var mediums = new[]
+                {
+                    new Medium { Type = "Huile sur toile" },
+                    new Medium { Type = "Acrylique" },
+                    new Medium { Type = "Aquarelle" },
+                    new Medium { Type = "Bronze" },
+                    new Medium { Type = "Marbre" },
+                    new Medium { Type = "Photographie numérique" },
+                    new Medium { Type = "Technique mixte" }
+                };
+                context.Mediums.AddRange(mediums);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Mediums seeded.");
+            }
+            
+            // Seed Encans if none exist
+            if (!await context.Encans.AnyAsync())
+            {
+                var encan = new Encan
+                {
+                    NumeroEncan = 1,
+                    DateDebut = DateTime.UtcNow.AddDays(-10),
+                    DateFin = DateTime.UtcNow.AddDays(30),
+                    DateDebutSoireeCloture = DateTime.UtcNow.AddDays(29),
+                    EstPublie = true,
+                    EstTermine = false,
+                    PasMise = 10,
+                    PasLot = 1
+                };
+                context.Encans.Add(encan);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Encan seeded.");
+                
+                // Seed some Lots for this Encan
+                var categorie = await context.Categories.FirstAsync();
+                var medium = await context.Mediums.FirstAsync();
+                
+                var lots = new[]
+                {
+                    new Lot
+                    {
+                        Numero = "LOT-001",
+                        Artiste = "Pablo Picasso",
+                        Description = "Magnifique œuvre abstraite",
+                        DateCreation = new DateTime(1950, 1, 1),
+                        Largeur = 100,
+                        Hauteur = 80,
+                        PrixOuverture = 1000,
+                        PrixMinPourVente = 800,
+                        ValeurEstimeMin = 1500,
+                        ValeurEstimeMax = 2500,
+                        IdCategorie = categorie.Id,
+                        IdMedium = medium.Id,
+                        EstLivrable = true,
+                        EstVendu = false,
+                        Mise = 0
+                    },
+                    new Lot
+                    {
+                        Numero = "LOT-002",
+                        Artiste = "Claude Monet",
+                        Description = "Paysage impressionniste",
+                        DateCreation = new DateTime(1880, 6, 15),
+                        Largeur = 120,
+                        Hauteur = 90,
+                        PrixOuverture = 2000,
+                        PrixMinPourVente = 1800,
+                        ValeurEstimeMin = 3000,
+                        ValeurEstimeMax = 5000,
+                        IdCategorie = categorie.Id,
+                        IdMedium = medium.Id,
+                        EstLivrable = true,
+                        EstVendu = false,
+                        Mise = 0
+                    }
+                };
+                
+                context.Lots.AddRange(lots);
+                await context.SaveChangesAsync();
+                
+                // Associate lots with encan
+                foreach (var lot in lots)
+                {
+                    context.EncanLots.Add(new EncanLot
+                    {
+                        IdEncan = encan.Id,
+                        IdLot = lot.Id
+                    });
+                }
+                await context.SaveChangesAsync();
+                Console.WriteLine("Lots seeded and associated with Encan.");
+            }
+            
             Console.WriteLine("Database seeding completed.");
         }
         else
