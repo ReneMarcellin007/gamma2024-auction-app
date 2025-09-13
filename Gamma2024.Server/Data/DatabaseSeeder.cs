@@ -13,11 +13,18 @@ namespace Gamma2024.Server.Data
             using var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
 
-            // Vérifier si la base de données contient déjà des données
-            if (context.Encans.Any())
-            {
-                return; // La base de données a déjà été initialisée
-            }
+            Console.WriteLine("=== FORCER LA RECRÉATION DES DONNÉES ===");
+            
+            // Supprimer toutes les données existantes pour forcer la recréation
+            context.EncanLots.RemoveRange(context.EncanLots);
+            context.Photos.RemoveRange(context.Photos);
+            context.Lots.RemoveRange(context.Lots);
+            context.Encans.RemoveRange(context.Encans);
+            context.Vendeurs.RemoveRange(context.Vendeurs);
+            context.Categories.RemoveRange(context.Categories);
+            context.Mediums.RemoveRange(context.Mediums);
+            context.SaveChanges();
+            Console.WriteLine("Toutes les données existantes ont été supprimées.");
 
             // Ajouter les catégories
             var categories = new[]

@@ -405,17 +405,14 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("Mediums seeded.");
             }
             
-            // Créer les encans seulement s'ils n'existent pas
-            if (!await context.Encans.AnyAsync())
-            {
-                Console.WriteLine("Creating all Encans...");
-                // Utiliser notre DatabaseSeeder
-                DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
-            }
-            else
-            {
-                Console.WriteLine("Encans already exist, skipping seeding.");
-            }
+            // FORCER LA CRÉATION DES ENCANS ET LOTS
+            Console.WriteLine("=== FORCER LA CRÉATION DES ENCANS ET LOTS ===");
+            DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
+            
+            // Vérifier les données après le seeding
+            var encanCount = await context.Encans.CountAsync();
+            var lotCount = await context.Lots.CountAsync();
+            Console.WriteLine($"Après seeding: {encanCount} encans, {lotCount} lots");
             
             
             Console.WriteLine("Database seeding completed.");
