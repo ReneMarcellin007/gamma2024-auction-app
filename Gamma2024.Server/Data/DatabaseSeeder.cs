@@ -123,9 +123,10 @@ namespace Gamma2024.Server.Data
             context.Encans.AddRange(encanEnCours, encanPasse, encanFutur);
             context.SaveChanges();
 
-            // Créer des lots
+            // Créer BEAUCOUP de lots variés
             var lots = new[]
             {
+                // ENCAN EN COURS - Lots 1-8
                 new Lot
                 {
                     Id = 1,
@@ -136,7 +137,7 @@ namespace Gamma2024.Server.Data
                     ValeurEstimeMax = 8000,
                     PrixOuverture = 3000,
                     PrixMinPourVente = 4000,
-                    Mise = 0,
+                    Mise = 3200,
                     EstVendu = false,
                     EstLivrable = true,
                     IdCategorie = 1,
@@ -159,7 +160,7 @@ namespace Gamma2024.Server.Data
                     ValeurEstimeMax = 15000,
                     PrixOuverture = 7000,
                     PrixMinPourVente = 9000,
-                    Mise = 0,
+                    Mise = 7500,
                     EstVendu = false,
                     EstLivrable = true,
                     IdCategorie = 1,
@@ -176,13 +177,153 @@ namespace Gamma2024.Server.Data
                 {
                     Id = 3,
                     Numero = "LOT-003",
+                    Artiste = "Vincent van Gogh",
+                    Description = "Champ de blé aux corbeaux - Reproduction",
+                    ValeurEstimeMin = 2000,
+                    ValeurEstimeMax = 3000,
+                    PrixOuverture = 1500,
+                    PrixMinPourVente = 1800,
+                    Mise = 1600,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 3,
+                    Hauteur = 50,
+                    Largeur = 100,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 4,
+                    Numero = "LOT-004",
+                    Artiste = "Leonardo da Vinci",
+                    Description = "Portrait de Mona Lisa - Copie certifiée",
+                    ValeurEstimeMin = 20000,
+                    ValeurEstimeMax = 30000,
+                    PrixOuverture = 15000,
+                    PrixMinPourVente = 18000,
+                    Mise = 15500,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 1,
+                    Hauteur = 77,
+                    Largeur = 53,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 5,
+                    Numero = "LOT-005",
+                    Artiste = "Henri Matisse",
+                    Description = "Femme au chapeau - Fauvisme",
+                    ValeurEstimeMin = 8000,
+                    ValeurEstimeMax = 12000,
+                    PrixOuverture = 6000,
+                    PrixMinPourVente = 7000,
+                    Mise = 6200,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 2,
+                    IdVendeur = 2,
+                    Hauteur = 80,
+                    Largeur = 65,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 6,
+                    Numero = "LOT-006",
+                    Artiste = "Salvador Dalí",
+                    Description = "La Persistance de la mémoire - Surréalisme",
+                    ValeurEstimeMin = 15000,
+                    ValeurEstimeMax = 25000,
+                    PrixOuverture = 12000,
+                    PrixMinPourVente = 14000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 3,
+                    Hauteur = 24,
+                    Largeur = 33,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 7,
+                    Numero = "LOT-007",
+                    Artiste = "Jackson Pollock",
+                    Description = "No. 1 - Peinture gestuelle",
+                    ValeurEstimeMin = 30000,
+                    ValeurEstimeMax = 50000,
+                    PrixOuverture = 25000,
+                    PrixMinPourVente = 28000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 2,
+                    IdVendeur = 1,
+                    Hauteur = 200,
+                    Largeur = 300,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 8,
+                    Numero = "LOT-008",
+                    Artiste = "Edvard Munch",
+                    Description = "Le Cri - Expressionnisme",
+                    ValeurEstimeMin = 18000,
+                    ValeurEstimeMax = 28000,
+                    PrixOuverture = 15000,
+                    PrixMinPourVente = 17000,
+                    Mise = 15200,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 2,
+                    Hauteur = 91,
+                    Largeur = 73,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                },
+
+                // ENCAN PASSÉ - Lots 9-14 (vendus)
+                new Lot
+                {
+                    Id = 9,
+                    Numero = "LOT-009",
                     Artiste = "Auguste Rodin",
                     Description = "Le Penseur - Réplique en bronze",
                     ValeurEstimeMin = 3000,
                     ValeurEstimeMax = 5000,
                     PrixOuverture = 2000,
                     PrixMinPourVente = 2500,
-                    Mise = 1500, // Lot avec une mise (encan passé)
+                    Mise = 4200,
                     EstVendu = true,
                     DateFinVente = DateTime.UtcNow.AddDays(-15),
                     EstLivrable = true,
@@ -196,26 +337,253 @@ namespace Gamma2024.Server.Data
                 },
                 new Lot
                 {
-                    Id = 4,
-                    Numero = "LOT-004",
-                    Artiste = "Vincent van Gogh",
-                    Description = "Champ de blé aux corbeaux - Reproduction",
-                    ValeurEstimeMin = 2000,
-                    ValeurEstimeMax = 3000,
-                    PrixOuverture = 1500,
-                    PrixMinPourVente = 1800,
+                    Id = 10,
+                    Numero = "LOT-010",
+                    Artiste = "Alberto Giacometti",
+                    Description = "L'Homme qui marche - Bronze",
+                    ValeurEstimeMin = 8000,
+                    ValeurEstimeMax = 12000,
+                    PrixOuverture = 6000,
+                    PrixMinPourVente = 7000,
+                    Mise = 9500,
+                    EstVendu = true,
+                    DateFinVente = DateTime.UtcNow.AddDays(-15),
+                    EstLivrable = true,
+                    IdCategorie = 2,
+                    IdMedium = 3,
+                    IdVendeur = 2,
+                    Hauteur = 183,
+                    Largeur = 95,
+                    DateCreation = DateTime.UtcNow.AddDays(-40),
+                    DateDepot = DateTime.UtcNow.AddDays(-35)
+                },
+                new Lot
+                {
+                    Id = 11,
+                    Numero = "LOT-011",
+                    Artiste = "Henry Moore",
+                    Description = "Figure allongée - Marbre",
+                    ValeurEstimeMin = 12000,
+                    ValeurEstimeMax = 18000,
+                    PrixOuverture = 10000,
+                    PrixMinPourVente = 11000,
+                    Mise = 15000,
+                    EstVendu = true,
+                    DateFinVente = DateTime.UtcNow.AddDays(-15),
+                    EstLivrable = true,
+                    IdCategorie = 2,
+                    IdMedium = 4,
+                    IdVendeur = 3,
+                    Hauteur = 60,
+                    Largeur = 150,
+                    DateCreation = DateTime.UtcNow.AddDays(-40),
+                    DateDepot = DateTime.UtcNow.AddDays(-35)
+                },
+                new Lot
+                {
+                    Id = 12,
+                    Numero = "LOT-012",
+                    Artiste = "Ansel Adams",
+                    Description = "Moonrise over Hernandez - Photographie",
+                    ValeurEstimeMin = 5000,
+                    ValeurEstimeMax = 8000,
+                    PrixOuverture = 4000,
+                    PrixMinPourVente = 4500,
+                    Mise = 6200,
+                    EstVendu = true,
+                    DateFinVente = DateTime.UtcNow.AddDays(-15),
+                    EstLivrable = true,
+                    IdCategorie = 3,
+                    IdMedium = 5,
+                    IdVendeur = 1,
+                    Hauteur = 40,
+                    Largeur = 50,
+                    DateCreation = DateTime.UtcNow.AddDays(-40),
+                    DateDepot = DateTime.UtcNow.AddDays(-35)
+                },
+                new Lot
+                {
+                    Id = 13,
+                    Numero = "LOT-013",
+                    Artiste = "Georgia O'Keeffe",
+                    Description = "Red Canna - Modernisme américain",
+                    ValeurEstimeMin = 7000,
+                    ValeurEstimeMax = 11000,
+                    PrixOuverture = 5500,
+                    PrixMinPourVente = 6000,
+                    Mise = 8000,
+                    EstVendu = true,
+                    DateFinVente = DateTime.UtcNow.AddDays(-15),
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 2,
+                    Hauteur = 91,
+                    Largeur = 76,
+                    DateCreation = DateTime.UtcNow.AddDays(-40),
+                    DateDepot = DateTime.UtcNow.AddDays(-35)
+                },
+                new Lot
+                {
+                    Id = 14,
+                    Numero = "LOT-014",
+                    Artiste = "M.C. Escher",
+                    Description = "Relativity - Lithographie",
+                    ValeurEstimeMin = 3000,
+                    ValeurEstimeMax = 5000,
+                    PrixOuverture = 2500,
+                    PrixMinPourVente = 2800,
+                    Mise = 3800,
+                    EstVendu = true,
+                    DateFinVente = DateTime.UtcNow.AddDays(-15),
+                    EstLivrable = true,
+                    IdCategorie = 5,
+                    IdMedium = 5,
+                    IdVendeur = 3,
+                    Hauteur = 28,
+                    Largeur = 29,
+                    DateCreation = DateTime.UtcNow.AddDays(-40),
+                    DateDepot = DateTime.UtcNow.AddDays(-35)
+                },
+
+                // ENCAN FUTUR - Lots 15-20
+                new Lot
+                {
+                    Id = 15,
+                    Numero = "LOT-015",
+                    Artiste = "Frida Kahlo",
+                    Description = "Autoportrait aux épines - Surréalisme mexicain",
+                    ValeurEstimeMin = 25000,
+                    ValeurEstimeMax = 40000,
+                    PrixOuverture = 20000,
+                    PrixMinPourVente = 22000,
                     Mise = 0,
                     EstVendu = false,
                     EstLivrable = true,
                     IdCategorie = 1,
                     IdMedium = 1,
-                    IdVendeur = 3,
-                    Hauteur = 50,
-                    Largeur = 100,
+                    IdVendeur = 1,
+                    Hauteur = 61,
+                    Largeur = 47,
                     DateCreation = DateTime.UtcNow,
                     DateDepot = DateTime.UtcNow,
-                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
-                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(25),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(35)
+                },
+                new Lot
+                {
+                    Id = 16,
+                    Numero = "LOT-016",
+                    Artiste = "Andy Warhol",
+                    Description = "Campbell's Soup Cans - Pop Art",
+                    ValeurEstimeMin = 15000,
+                    ValeurEstimeMax = 25000,
+                    PrixOuverture = 12000,
+                    PrixMinPourVente = 14000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 4,
+                    IdMedium = 2,
+                    IdVendeur = 2,
+                    Hauteur = 51,
+                    Largeur = 41,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(25),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(35)
+                },
+                new Lot
+                {
+                    Id = 17,
+                    Numero = "LOT-017",
+                    Artiste = "Banksy",
+                    Description = "Girl with Balloon - Street Art",
+                    ValeurEstimeMin = 10000,
+                    ValeurEstimeMax = 18000,
+                    PrixOuverture = 8000,
+                    PrixMinPourVente = 9000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 4,
+                    IdMedium = 2,
+                    IdVendeur = 3,
+                    Hauteur = 100,
+                    Largeur = 70,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(25),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(35)
+                },
+                new Lot
+                {
+                    Id = 18,
+                    Numero = "LOT-018",
+                    Artiste = "Yves Klein",
+                    Description = "IKB 191 - Bleu Klein International",
+                    ValeurEstimeMin = 20000,
+                    ValeurEstimeMax = 30000,
+                    PrixOuverture = 18000,
+                    PrixMinPourVente = 19000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 2,
+                    IdVendeur = 1,
+                    Hauteur = 199,
+                    Largeur = 153,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(25),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(35)
+                },
+                new Lot
+                {
+                    Id = 19,
+                    Numero = "LOT-019",
+                    Artiste = "Kaws",
+                    Description = "Companion - Sculpture contemporaine",
+                    ValeurEstimeMin = 8000,
+                    ValeurEstimeMax = 15000,
+                    PrixOuverture = 6000,
+                    PrixMinPourVente = 7000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 2,
+                    IdMedium = 3,
+                    IdVendeur = 2,
+                    Hauteur = 130,
+                    Largeur = 60,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(25),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(35)
+                },
+                new Lot
+                {
+                    Id = 20,
+                    Numero = "LOT-020",
+                    Artiste = "Takashi Murakami",
+                    Description = "Cherry Blossom - Art contemporain japonais",
+                    ValeurEstimeMin = 12000,
+                    ValeurEstimeMax = 20000,
+                    PrixOuverture = 10000,
+                    PrixMinPourVente = 11000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 4,
+                    IdMedium = 2,
+                    IdVendeur = 3,
+                    Hauteur = 150,
+                    Largeur = 150,
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(25),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(35)
                 }
             };
 
@@ -225,30 +593,128 @@ namespace Gamma2024.Server.Data
             // Associer les lots aux encans
             var encanLots = new[]
             {
-                // Lots pour l'encan en cours
+                // Encan en cours (Id=1) - Lots 1-8
                 new EncanLot { IdEncan = 1, IdLot = 1 },
                 new EncanLot { IdEncan = 1, IdLot = 2 },
+                new EncanLot { IdEncan = 1, IdLot = 3 },
                 new EncanLot { IdEncan = 1, IdLot = 4 },
+                new EncanLot { IdEncan = 1, IdLot = 5 },
+                new EncanLot { IdEncan = 1, IdLot = 6 },
+                new EncanLot { IdEncan = 1, IdLot = 7 },
+                new EncanLot { IdEncan = 1, IdLot = 8 },
                 
-                // Lot pour l'encan passé
-                new EncanLot { IdEncan = 2, IdLot = 3 },
+                // Encan passé (Id=2) - Lots 9-14 (vendus)
+                new EncanLot { IdEncan = 2, IdLot = 9 },
+                new EncanLot { IdEncan = 2, IdLot = 10 },
+                new EncanLot { IdEncan = 2, IdLot = 11 },
+                new EncanLot { IdEncan = 2, IdLot = 12 },
+                new EncanLot { IdEncan = 2, IdLot = 13 },
+                new EncanLot { IdEncan = 2, IdLot = 14 },
                 
-                // Lots pour l'encan futur
-                new EncanLot { IdEncan = 3, IdLot = 1 },
-                new EncanLot { IdEncan = 3, IdLot = 2 }
+                // Encan futur (Id=3) - Lots 15-20
+                new EncanLot { IdEncan = 3, IdLot = 15 },
+                new EncanLot { IdEncan = 3, IdLot = 16 },
+                new EncanLot { IdEncan = 3, IdLot = 17 },
+                new EncanLot { IdEncan = 3, IdLot = 18 },
+                new EncanLot { IdEncan = 3, IdLot = 19 },
+                new EncanLot { IdEncan = 3, IdLot = 20 }
             };
 
             context.EncanLots.AddRange(encanLots);
             context.SaveChanges();
 
-            // Ajouter quelques photos d'exemple
+            // Ajouter BEAUCOUP de photos (2-3 par lot)
             var photos = new[]
             {
+                // Photos pour LOT-001 (Picasso)
                 new Photo { Id = 1, IdLot = 1, Lien = "/images/lots/lot001_1.jpg" },
                 new Photo { Id = 2, IdLot = 1, Lien = "/images/lots/lot001_2.jpg" },
-                new Photo { Id = 3, IdLot = 2, Lien = "/images/lots/lot002_1.jpg" },
-                new Photo { Id = 4, IdLot = 3, Lien = "/images/lots/lot003_1.jpg" },
-                new Photo { Id = 5, IdLot = 4, Lien = "/images/lots/lot004_1.jpg" }
+                new Photo { Id = 3, IdLot = 1, Lien = "/images/lots/lot001_detail.jpg" },
+
+                // Photos pour LOT-002 (Monet)
+                new Photo { Id = 4, IdLot = 2, Lien = "/images/lots/lot002_1.jpg" },
+                new Photo { Id = 5, IdLot = 2, Lien = "/images/lots/lot002_2.jpg" },
+                new Photo { Id = 6, IdLot = 2, Lien = "/images/lots/lot002_signature.jpg" },
+
+                // Photos pour LOT-003 (Van Gogh)
+                new Photo { Id = 7, IdLot = 3, Lien = "/images/lots/lot003_1.jpg" },
+                new Photo { Id = 8, IdLot = 3, Lien = "/images/lots/lot003_2.jpg" },
+
+                // Photos pour LOT-004 (Da Vinci)
+                new Photo { Id = 9, IdLot = 4, Lien = "/images/lots/lot004_1.jpg" },
+                new Photo { Id = 10, IdLot = 4, Lien = "/images/lots/lot004_2.jpg" },
+                new Photo { Id = 11, IdLot = 4, Lien = "/images/lots/lot004_detail.jpg" },
+
+                // Photos pour LOT-005 (Matisse)
+                new Photo { Id = 12, IdLot = 5, Lien = "/images/lots/lot005_1.jpg" },
+                new Photo { Id = 13, IdLot = 5, Lien = "/images/lots/lot005_2.jpg" },
+
+                // Photos pour LOT-006 (Dalí)
+                new Photo { Id = 14, IdLot = 6, Lien = "/images/lots/lot006_1.jpg" },
+                new Photo { Id = 15, IdLot = 6, Lien = "/images/lots/lot006_2.jpg" },
+                new Photo { Id = 16, IdLot = 6, Lien = "/images/lots/lot006_detail.jpg" },
+
+                // Photos pour LOT-007 (Pollock)
+                new Photo { Id = 17, IdLot = 7, Lien = "/images/lots/lot007_1.jpg" },
+                new Photo { Id = 18, IdLot = 7, Lien = "/images/lots/lot007_2.jpg" },
+                new Photo { Id = 19, IdLot = 7, Lien = "/images/lots/lot007_texture.jpg" },
+
+                // Photos pour LOT-008 (Munch)
+                new Photo { Id = 20, IdLot = 8, Lien = "/images/lots/lot008_1.jpg" },
+                new Photo { Id = 21, IdLot = 8, Lien = "/images/lots/lot008_2.jpg" },
+
+                // Photos pour LOT-009 (Rodin)
+                new Photo { Id = 22, IdLot = 9, Lien = "/images/lots/lot009_1.jpg" },
+                new Photo { Id = 23, IdLot = 9, Lien = "/images/lots/lot009_2.jpg" },
+                new Photo { Id = 24, IdLot = 9, Lien = "/images/lots/lot009_profile.jpg" },
+
+                // Photos pour LOT-010 (Giacometti)
+                new Photo { Id = 25, IdLot = 10, Lien = "/images/lots/lot010_1.jpg" },
+                new Photo { Id = 26, IdLot = 10, Lien = "/images/lots/lot010_2.jpg" },
+
+                // Photos pour LOT-011 (Henry Moore)
+                new Photo { Id = 27, IdLot = 11, Lien = "/images/lots/lot011_1.jpg" },
+                new Photo { Id = 28, IdLot = 11, Lien = "/images/lots/lot011_2.jpg" },
+                new Photo { Id = 29, IdLot = 11, Lien = "/images/lots/lot011_detail.jpg" },
+
+                // Photos pour LOT-012 (Ansel Adams)
+                new Photo { Id = 30, IdLot = 12, Lien = "/images/lots/lot012_1.jpg" },
+                new Photo { Id = 31, IdLot = 12, Lien = "/images/lots/lot012_2.jpg" },
+
+                // Photos pour LOT-013 (Georgia O'Keeffe)
+                new Photo { Id = 32, IdLot = 13, Lien = "/images/lots/lot013_1.jpg" },
+                new Photo { Id = 33, IdLot = 13, Lien = "/images/lots/lot013_2.jpg" },
+
+                // Photos pour LOT-014 (M.C. Escher)
+                new Photo { Id = 34, IdLot = 14, Lien = "/images/lots/lot014_1.jpg" },
+                new Photo { Id = 35, IdLot = 14, Lien = "/images/lots/lot014_2.jpg" },
+
+                // Photos pour LOT-015 (Frida Kahlo)
+                new Photo { Id = 36, IdLot = 15, Lien = "/images/lots/lot015_1.jpg" },
+                new Photo { Id = 37, IdLot = 15, Lien = "/images/lots/lot015_2.jpg" },
+                new Photo { Id = 38, IdLot = 15, Lien = "/images/lots/lot015_detail.jpg" },
+
+                // Photos pour LOT-016 (Andy Warhol)
+                new Photo { Id = 39, IdLot = 16, Lien = "/images/lots/lot016_1.jpg" },
+                new Photo { Id = 40, IdLot = 16, Lien = "/images/lots/lot016_2.jpg" },
+
+                // Photos pour LOT-017 (Banksy)
+                new Photo { Id = 41, IdLot = 17, Lien = "/images/lots/lot017_1.jpg" },
+                new Photo { Id = 42, IdLot = 17, Lien = "/images/lots/lot017_2.jpg" },
+
+                // Photos pour LOT-018 (Yves Klein)
+                new Photo { Id = 43, IdLot = 18, Lien = "/images/lots/lot018_1.jpg" },
+                new Photo { Id = 44, IdLot = 18, Lien = "/images/lots/lot018_2.jpg" },
+                new Photo { Id = 45, IdLot = 18, Lien = "/images/lots/lot018_blue.jpg" },
+
+                // Photos pour LOT-019 (Kaws)
+                new Photo { Id = 46, IdLot = 19, Lien = "/images/lots/lot019_1.jpg" },
+                new Photo { Id = 47, IdLot = 19, Lien = "/images/lots/lot019_2.jpg" },
+
+                // Photos pour LOT-020 (Takashi Murakami)
+                new Photo { Id = 48, IdLot = 20, Lien = "/images/lots/lot020_1.jpg" },
+                new Photo { Id = 49, IdLot = 20, Lien = "/images/lots/lot020_2.jpg" },
+                new Photo { Id = 50, IdLot = 20, Lien = "/images/lots/lot020_colors.jpg" }
             };
 
             context.Photos.AddRange(photos);
