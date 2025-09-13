@@ -83,9 +83,9 @@ namespace Gamma2024.Server.Data
             {
                 Id = 1,
                 NumeroEncan = 1,
-                DateDebut = DateTime.Now.AddDays(-5),
-                DateFin = DateTime.Now.AddDays(10),
-                DateDebutSoireeCloture = DateTime.Now.AddDays(9),
+                DateDebut = DateTime.UtcNow.AddDays(-5),
+                DateFin = DateTime.UtcNow.AddDays(10),
+                DateDebutSoireeCloture = DateTime.UtcNow.AddDays(9),
                 EstPublie = true,
                 EstTermine = false,
                 PasLot = 1,
@@ -97,9 +97,9 @@ namespace Gamma2024.Server.Data
             {
                 Id = 2,
                 NumeroEncan = 2,
-                DateDebut = DateTime.Now.AddDays(-30),
-                DateFin = DateTime.Now.AddDays(-15),
-                DateDebutSoireeCloture = DateTime.Now.AddDays(-16),
+                DateDebut = DateTime.UtcNow.AddDays(-30),
+                DateFin = DateTime.UtcNow.AddDays(-15),
+                DateDebutSoireeCloture = DateTime.UtcNow.AddDays(-16),
                 EstPublie = true,
                 EstTermine = true,
                 PasLot = 1,
@@ -111,9 +111,9 @@ namespace Gamma2024.Server.Data
             {
                 Id = 3,
                 NumeroEncan = 3,
-                DateDebut = DateTime.Now.AddDays(20),
-                DateFin = DateTime.Now.AddDays(35),
-                DateDebutSoireeCloture = DateTime.Now.AddDays(34),
+                DateDebut = DateTime.UtcNow.AddDays(20),
+                DateFin = DateTime.UtcNow.AddDays(35),
+                DateDebutSoireeCloture = DateTime.UtcNow.AddDays(34),
                 EstPublie = true,
                 EstTermine = false,
                 PasLot = 1,
@@ -144,10 +144,10 @@ namespace Gamma2024.Server.Data
                     IdVendeur = 1,
                     Hauteur = 60,
                     Largeur = 80,
-                    DateCreation = DateTime.Now,
-                    DateDepot = DateTime.Now,
-                    DateDebutDecompteLot = DateTime.Now.AddDays(8),
-                    DateFinDecompteLot = DateTime.Now.AddDays(10)
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
                 },
                 new Lot
                 {
@@ -167,10 +167,10 @@ namespace Gamma2024.Server.Data
                     IdVendeur = 2,
                     Hauteur = 90,
                     Largeur = 120,
-                    DateCreation = DateTime.Now,
-                    DateDepot = DateTime.Now,
-                    DateDebutDecompteLot = DateTime.Now.AddDays(8),
-                    DateFinDecompteLot = DateTime.Now.AddDays(10)
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
                 },
                 new Lot
                 {
@@ -184,15 +184,15 @@ namespace Gamma2024.Server.Data
                     PrixMinPourVente = 2500,
                     Mise = 1500, // Lot avec une mise (encan passé)
                     EstVendu = true,
-                    DateFinVente = DateTime.Now.AddDays(-15),
+                    DateFinVente = DateTime.UtcNow.AddDays(-15),
                     EstLivrable = true,
                     IdCategorie = 2,
                     IdMedium = 3,
                     IdVendeur = 1,
                     Hauteur = 40,
                     Largeur = 30,
-                    DateCreation = DateTime.Now.AddDays(-40),
-                    DateDepot = DateTime.Now.AddDays(-35)
+                    DateCreation = DateTime.UtcNow.AddDays(-40),
+                    DateDepot = DateTime.UtcNow.AddDays(-35)
                 },
                 new Lot
                 {
@@ -212,10 +212,10 @@ namespace Gamma2024.Server.Data
                     IdVendeur = 3,
                     Hauteur = 50,
                     Largeur = 100,
-                    DateCreation = DateTime.Now,
-                    DateDepot = DateTime.Now,
-                    DateDebutDecompteLot = DateTime.Now.AddDays(8),
-                    DateFinDecompteLot = DateTime.Now.AddDays(10)
+                    DateCreation = DateTime.UtcNow,
+                    DateDepot = DateTime.UtcNow,
+                    DateDebutDecompteLot = DateTime.UtcNow.AddDays(8),
+                    DateFinDecompteLot = DateTime.UtcNow.AddDays(10)
                 }
             };
 
@@ -274,9 +274,9 @@ namespace Gamma2024.Server.Data
         {
             Console.WriteLine("=== Vérification des données ===");
             Console.WriteLine($"Nombre d'encans: {context.Encans.Count()}");
-            Console.WriteLine($"  - En cours: {context.Encans.Count(e => e.DateDebut <= DateTime.Now && e.DateFin >= DateTime.Now)}");
-            Console.WriteLine($"  - Passés: {context.Encans.Count(e => e.DateFin < DateTime.Now)}");
-            Console.WriteLine($"  - Futurs: {context.Encans.Count(e => e.DateDebut > DateTime.Now)}");
+            Console.WriteLine($"  - En cours: {context.Encans.Count(e => e.DateDebut <= DateTime.UtcNow && e.DateFin >= DateTime.UtcNow)}");
+            Console.WriteLine($"  - Passés: {context.Encans.Count(e => e.DateFin < DateTime.UtcNow)}");
+            Console.WriteLine($"  - Futurs: {context.Encans.Count(e => e.DateDebut > DateTime.UtcNow)}");
             Console.WriteLine($"Nombre de lots: {context.Lots.Count()}");
             Console.WriteLine($"Nombre de catégories: {context.Categories.Count()}");
             Console.WriteLine($"Nombre de médiums: {context.Mediums.Count()}");
