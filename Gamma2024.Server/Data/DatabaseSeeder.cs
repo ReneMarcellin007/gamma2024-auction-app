@@ -56,42 +56,42 @@ namespace Gamma2024.Server.Data
             var encanEnCours = new Encan
             {
                 Id = 1,
-                NumeroEncan = $"ENC-{DateTime.Now.Year}-001",
+                NumeroEncan = 1,
                 DateDebut = DateTime.Now.AddDays(-5),
                 DateFin = DateTime.Now.AddDays(10),
                 DateDebutSoireeCloture = DateTime.Now.AddDays(9),
                 EstPublie = true,
                 EstTermine = false,
                 PasLot = 1,
-                PasMise = 10m
+                PasMise = 10
             };
 
             // Créer un encan passé
             var encanPasse = new Encan
             {
                 Id = 2,
-                NumeroEncan = $"ENC-{DateTime.Now.Year}-002",
+                NumeroEncan = 2,
                 DateDebut = DateTime.Now.AddDays(-30),
                 DateFin = DateTime.Now.AddDays(-15),
                 DateDebutSoireeCloture = DateTime.Now.AddDays(-16),
                 EstPublie = true,
                 EstTermine = true,
                 PasLot = 1,
-                PasMise = 10m
+                PasMise = 10
             };
 
             // Créer un encan futur
             var encanFutur = new Encan
             {
                 Id = 3,
-                NumeroEncan = $"ENC-{DateTime.Now.Year}-003",
+                NumeroEncan = 3,
                 DateDebut = DateTime.Now.AddDays(20),
                 DateFin = DateTime.Now.AddDays(35),
                 DateDebutSoireeCloture = DateTime.Now.AddDays(34),
                 EstPublie = true,
                 EstTermine = false,
                 PasLot = 1,
-                PasMise = 10m
+                PasMise = 10
             };
 
             context.Encans.AddRange(encanEnCours, encanPasse, encanFutur);
