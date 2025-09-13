@@ -1,0 +1,248 @@
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Gamma2024.Server.Models;
+
+namespace Gamma2024.Server.Data
+{
+    public static class DatabaseSeeder
+    {
+        public static void SeedDatabase(IServiceProvider serviceProvider)
+        {
+            using var context = new ApplicationDbContext(
+                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
+
+            // Vérifier si la base de données contient déjà des données
+            if (context.Encans.Any())
+            {
+                return; // La base de données a déjà été initialisée
+            }
+
+            // Ajouter les catégories
+            var categories = new[]
+            {
+                new Categorie { Id = 1, Nom = "Peinture" },
+                new Categorie { Id = 2, Nom = "Sculpture" },
+                new Categorie { Id = 3, Nom = "Photographie" },
+                new Categorie { Id = 4, Nom = "Art numérique" },
+                new Categorie { Id = 5, Nom = "Dessin" }
+            };
+            context.Categories.AddRange(categories);
+
+            // Ajouter les médiums
+            var mediums = new[]
+            {
+                new Medium { Id = 1, Type = "Huile sur toile" },
+                new Medium { Id = 2, Type = "Acrylique" },
+                new Medium { Id = 3, Type = "Bronze" },
+                new Medium { Id = 4, Type = "Marbre" },
+                new Medium { Id = 5, Type = "Photographie argentique" }
+            };
+            context.Mediums.AddRange(mediums);
+
+            // Ajouter les vendeurs
+            var vendeurs = new[]
+            {
+                new Vendeur { Id = 1, Nom = "Dupont", Prenom = "Jean" },
+                new Vendeur { Id = 2, Nom = "Martin", Prenom = "Marie" },
+                new Vendeur { Id = 3, Nom = "Leblanc", Prenom = "Pierre" }
+            };
+            context.Vendeurs.AddRange(vendeurs);
+
+            context.SaveChanges();
+
+            // Créer un encan en cours
+            var encanEnCours = new Encan
+            {
+                Id = 1,
+                NumeroEncan = $"ENC-{DateTime.Now.Year}-001",
+                DateDebut = DateTime.Now.AddDays(-5),
+                DateFin = DateTime.Now.AddDays(10),
+                DateDebutSoireeCloture = DateTime.Now.AddDays(9),
+                EstPublie = true,
+                EstTermine = false,
+                PasLot = 1,
+                PasMise = 10m
+            };
+
+            // Créer un encan passé
+            var encanPasse = new Encan
+            {
+                Id = 2,
+                NumeroEncan = $"ENC-{DateTime.Now.Year}-002",
+                DateDebut = DateTime.Now.AddDays(-30),
+                DateFin = DateTime.Now.AddDays(-15),
+                DateDebutSoireeCloture = DateTime.Now.AddDays(-16),
+                EstPublie = true,
+                EstTermine = true,
+                PasLot = 1,
+                PasMise = 10m
+            };
+
+            // Créer un encan futur
+            var encanFutur = new Encan
+            {
+                Id = 3,
+                NumeroEncan = $"ENC-{DateTime.Now.Year}-003",
+                DateDebut = DateTime.Now.AddDays(20),
+                DateFin = DateTime.Now.AddDays(35),
+                DateDebutSoireeCloture = DateTime.Now.AddDays(34),
+                EstPublie = true,
+                EstTermine = false,
+                PasLot = 1,
+                PasMise = 10m
+            };
+
+            context.Encans.AddRange(encanEnCours, encanPasse, encanFutur);
+            context.SaveChanges();
+
+            // Créer des lots
+            var lots = new[]
+            {
+                new Lot
+                {
+                    Id = 1,
+                    Numero = "LOT-001",
+                    Artiste = "Pablo Picasso",
+                    Description = "Nature morte aux fruits - Huile sur toile, période bleue",
+                    ValeurEstimeMin = 5000,
+                    ValeurEstimeMax = 8000,
+                    PrixOuverture = 3000,
+                    PrixMinPourVente = 4000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 1,
+                    Hauteur = 60,
+                    Largeur = 80,
+                    DateCreation = DateTime.Now,
+                    DateDepot = DateTime.Now,
+                    DateDebutDecompteLot = DateTime.Now.AddDays(8),
+                    DateFinDecompteLot = DateTime.Now.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 2,
+                    Numero = "LOT-002",
+                    Artiste = "Claude Monet",
+                    Description = "Jardin à Giverny - Impression du matin",
+                    ValeurEstimeMin = 10000,
+                    ValeurEstimeMax = 15000,
+                    PrixOuverture = 7000,
+                    PrixMinPourVente = 9000,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 2,
+                    IdVendeur = 2,
+                    Hauteur = 90,
+                    Largeur = 120,
+                    DateCreation = DateTime.Now,
+                    DateDepot = DateTime.Now,
+                    DateDebutDecompteLot = DateTime.Now.AddDays(8),
+                    DateFinDecompteLot = DateTime.Now.AddDays(10)
+                },
+                new Lot
+                {
+                    Id = 3,
+                    Numero = "LOT-003",
+                    Artiste = "Auguste Rodin",
+                    Description = "Le Penseur - Réplique en bronze",
+                    ValeurEstimeMin = 3000,
+                    ValeurEstimeMax = 5000,
+                    PrixOuverture = 2000,
+                    PrixMinPourVente = 2500,
+                    Mise = 1500, // Lot avec une mise (encan passé)
+                    EstVendu = true,
+                    DateFinVente = DateTime.Now.AddDays(-15),
+                    EstLivrable = true,
+                    IdCategorie = 2,
+                    IdMedium = 3,
+                    IdVendeur = 1,
+                    Hauteur = 40,
+                    Largeur = 30,
+                    DateCreation = DateTime.Now.AddDays(-40),
+                    DateDepot = DateTime.Now.AddDays(-35)
+                },
+                new Lot
+                {
+                    Id = 4,
+                    Numero = "LOT-004",
+                    Artiste = "Vincent van Gogh",
+                    Description = "Champ de blé aux corbeaux - Reproduction",
+                    ValeurEstimeMin = 2000,
+                    ValeurEstimeMax = 3000,
+                    PrixOuverture = 1500,
+                    PrixMinPourVente = 1800,
+                    Mise = 0,
+                    EstVendu = false,
+                    EstLivrable = true,
+                    IdCategorie = 1,
+                    IdMedium = 1,
+                    IdVendeur = 3,
+                    Hauteur = 50,
+                    Largeur = 100,
+                    DateCreation = DateTime.Now,
+                    DateDepot = DateTime.Now,
+                    DateDebutDecompteLot = DateTime.Now.AddDays(8),
+                    DateFinDecompteLot = DateTime.Now.AddDays(10)
+                }
+            };
+
+            context.Lots.AddRange(lots);
+            context.SaveChanges();
+
+            // Associer les lots aux encans
+            var encanLots = new[]
+            {
+                // Lots pour l'encan en cours
+                new EncanLot { IdEncan = 1, IdLot = 1 },
+                new EncanLot { IdEncan = 1, IdLot = 2 },
+                new EncanLot { IdEncan = 1, IdLot = 4 },
+                
+                // Lot pour l'encan passé
+                new EncanLot { IdEncan = 2, IdLot = 3 },
+                
+                // Lots pour l'encan futur
+                new EncanLot { IdEncan = 3, IdLot = 1 },
+                new EncanLot { IdEncan = 3, IdLot = 2 }
+            };
+
+            context.EncanLots.AddRange(encanLots);
+            context.SaveChanges();
+
+            // Ajouter quelques photos d'exemple
+            var photos = new[]
+            {
+                new Photo { Id = 1, IdLot = 1, Lien = "/images/lots/lot001_1.jpg" },
+                new Photo { Id = 2, IdLot = 1, Lien = "/images/lots/lot001_2.jpg" },
+                new Photo { Id = 3, IdLot = 2, Lien = "/images/lots/lot002_1.jpg" },
+                new Photo { Id = 4, IdLot = 3, Lien = "/images/lots/lot003_1.jpg" },
+                new Photo { Id = 5, IdLot = 4, Lien = "/images/lots/lot004_1.jpg" }
+            };
+
+            context.Photos.AddRange(photos);
+            context.SaveChanges();
+
+            Console.WriteLine("Base de données initialisée avec succès!");
+            VerifierDonnees(context);
+        }
+
+        public static void VerifierDonnees(ApplicationDbContext context)
+        {
+            Console.WriteLine("=== Vérification des données ===");
+            Console.WriteLine($"Nombre d'encans: {context.Encans.Count()}");
+            Console.WriteLine($"  - En cours: {context.Encans.Count(e => e.DateDebut <= DateTime.Now && e.DateFin >= DateTime.Now)}");
+            Console.WriteLine($"  - Passés: {context.Encans.Count(e => e.DateFin < DateTime.Now)}");
+            Console.WriteLine($"  - Futurs: {context.Encans.Count(e => e.DateDebut > DateTime.Now)}");
+            Console.WriteLine($"Nombre de lots: {context.Lots.Count()}");
+            Console.WriteLine($"Nombre de catégories: {context.Categories.Count()}");
+            Console.WriteLine($"Nombre de médiums: {context.Mediums.Count()}");
+            Console.WriteLine($"Nombre de vendeurs: {context.Vendeurs.Count()}");
+        }
+    }
+}

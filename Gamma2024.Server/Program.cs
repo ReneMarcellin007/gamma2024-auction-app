@@ -308,22 +308,31 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Database connection successful.");
             
-            // FORCER LA RECRÉATION COMPLÈTE EN PRODUCTION
-            Console.WriteLine("FORCING COMPLETE DATABASE RECREATION!");
-            try 
+            // Appliquer les migrations en attente ou créer la base si elle n'existe pas
+            Console.WriteLine("Checking database...");
+            if (app.Environment.IsDevelopment())
             {
-                Console.WriteLine("Deleting existing database...");
-                await context.Database.EnsureDeletedAsync();
-                Console.WriteLine("Database deleted.");
+                // En développement, utiliser EnsureCreated
+                await context.Database.EnsureCreatedAsync();
+                Console.WriteLine("Database ensured created.");
             }
-            catch (Exception delEx)
+            else
             {
-                Console.WriteLine($"Could not delete database: {delEx.Message}");
+                // En production, utiliser les migrations
+                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                if (pendingMigrations.Any())
+                {
+                    Console.WriteLine($"Applying {pendingMigrations.Count()} pending migrations...");
+                    await context.Database.MigrateAsync();
+                    Console.WriteLine("Migrations applied.");
+                }
+                else
+                {
+                    // Si pas de migrations, créer la base
+                    await context.Database.EnsureCreatedAsync();
+                    Console.WriteLine("Database created.");
+                }
             }
-            
-            Console.WriteLine("Creating fresh database with schema...");
-            await context.Database.EnsureCreatedAsync();
-            Console.WriteLine("Database created with all tables!");
             
             // Créer les rôles de base s'ils n'existent pas
             Console.WriteLine("Creating default roles...");
@@ -360,335 +369,54 @@ using (var scope = app.Services.CreateScope())
                 }
             }
             
-            // Seed Categories (always add them after DB recreation)
-            Console.WriteLine("Seeding categories...");
-            var categories = new[]
+            // Seed Categories si elles n'existent pas
+            if (!await context.Categories.AnyAsync())
             {
-                new Categorie { Nom = "Peinture" },
-                new Categorie { Nom = "Sculpture" },
-                new Categorie { Nom = "Photographie" },
-                new Categorie { Nom = "Art numérique" },
-                new Categorie { Nom = "Dessin" }
-            };
-            context.Categories.AddRange(categories);
-            await context.SaveChangesAsync();
-            Console.WriteLine("Categories seeded.");
-            
-            // Seed Mediums (always add them after DB recreation)
-            Console.WriteLine("Seeding mediums...");
-            var mediums = new[]
-            {
-                new Medium { Type = "Huile sur toile" },
-                new Medium { Type = "Acrylique" },
-                new Medium { Type = "Aquarelle" },
-                new Medium { Type = "Bronze" },
-                new Medium { Type = "Marbre" },
-                new Medium { Type = "Photographie numérique" },
-                new Medium { Type = "Technique mixte" }
-            };
-            context.Mediums.AddRange(mediums);
-            await context.SaveChangesAsync();
-            Console.WriteLine("Mediums seeded.");
-            
-            // Create all encans (after DB recreation)
-            Console.WriteLine("Creating all Encans...");
-            
-            // Obtenir les catégories et médiums pour les lots
-            var categoriePeinture = await context.Categories.FirstAsync(c => c.Nom == "Peinture");
-            var categorieSculpture = await context.Categories.FirstAsync(c => c.Nom == "Sculpture");
-            var categoriePhoto = await context.Categories.FirstAsync(c => c.Nom == "Photographie");
-            var mediumHuile = await context.Mediums.FirstAsync(m => m.Type == "Huile sur toile");
-            var mediumBronze = await context.Mediums.FirstAsync(m => m.Type == "Bronze");
-            var mediumPhoto = await context.Mediums.FirstAsync(m => m.Type == "Photographie numérique");
-            
-            // Créer l'encan actuel (termine le 12 octobre 2026)
-            Console.WriteLine("Creating current encan...");
-            var encanActuel = new Encan
-            {
-                NumeroEncan = 1,
-                DateDebut = new DateTime(2025, 9, 1, 0, 0, 0, DateTimeKind.Utc),
-                DateFin = new DateTime(2026, 10, 12, 23, 59, 59, DateTimeKind.Utc),
-                DateDebutSoireeCloture = new DateTime(2026, 10, 11, 18, 0, 0, DateTimeKind.Utc),
-                EstPublie = true,
-                EstTermine = false,
-                PasMise = 10,
-                PasLot = 1
-            };
-            context.Encans.Add(encanActuel);
-            await context.SaveChangesAsync();
-            Console.WriteLine("Current encan created.");
-            
-            // Ajouter des lots à l'encan actuel
-            Console.WriteLine("Adding lots to current encan...");
-            var lotsActuels = new[]
-            {
-                new Lot
+                Console.WriteLine("Seeding categories...");
+                var categories = new[]
                 {
-                    Numero = "LOT-001",
-                    Artiste = "Pablo Picasso",
-                    Description = "Magnifique œuvre abstraite de la période bleue",
-                    DateCreation = new DateTime(1903, 1, 1),
-                    Largeur = 100,
-                    Hauteur = 80,
-                    PrixOuverture = 15000,
-                    PrixMinPourVente = 12000,
-                    ValeurEstimeMin = 20000,
-                    ValeurEstimeMax = 35000,
-                    IdCategorie = categoriePeinture.Id,
-                    IdMedium = mediumHuile.Id,
-                    EstLivrable = true,
-                    EstVendu = false,
-                    Mise = 0
-                },
-                new Lot
-                {
-                    Numero = "LOT-002",
-                    Artiste = "Claude Monet",
-                    Description = "Nymphéas, paysage aquatique impressionniste",
-                    DateCreation = new DateTime(1906, 6, 15),
-                    Largeur = 120,
-                    Hauteur = 90,
-                    PrixOuverture = 25000,
-                    PrixMinPourVente = 22000,
-                    ValeurEstimeMin = 30000,
-                    ValeurEstimeMax = 50000,
-                    IdCategorie = categoriePeinture.Id,
-                    IdMedium = mediumHuile.Id,
-                    EstLivrable = true,
-                    EstVendu = false,
-                    Mise = 0
-                },
-                new Lot
-                {
-                    Numero = "LOT-003",
-                    Artiste = "Auguste Rodin",
-                    Description = "Le Penseur, réduction en bronze",
-                    DateCreation = new DateTime(1902, 3, 10),
-                    Largeur = 40,
-                    Hauteur = 70,
-                    PrixOuverture = 8000,
-                    PrixMinPourVente = 7000,
-                    ValeurEstimeMin = 10000,
-                    ValeurEstimeMax = 15000,
-                    IdCategorie = categorieSculpture.Id,
-                    IdMedium = mediumBronze.Id,
-                    EstLivrable = true,
-                    EstVendu = false,
-                    Mise = 0
-                }
-            };
-            
-            context.Lots.AddRange(lotsActuels);
-            await context.SaveChangesAsync();
-            
-            foreach (var lot in lotsActuels)
-            {
-                context.EncanLots.Add(new EncanLot
-                {
-                    IdEncan = encanActuel.Id,
-                    IdLot = lot.Id
-                });
+                    new Categorie { Nom = "Peinture" },
+                    new Categorie { Nom = "Sculpture" },
+                    new Categorie { Nom = "Photographie" },
+                    new Categorie { Nom = "Art numérique" },
+                    new Categorie { Nom = "Dessin" }
+                };
+                context.Categories.AddRange(categories);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Categories seeded.");
             }
-            await context.SaveChangesAsync();
-            Console.WriteLine("Lots added to current encan.");
             
-            // Créer 2 encans passés
-            // Encan passé 1 (Jan-Mar 2024)
-            Console.WriteLine("Creating past encan 1...");
-            var encanPasse1 = new Encan
+            // Seed Mediums si ils n'existent pas
+            if (!await context.Mediums.AnyAsync())
             {
-                NumeroEncan = 2,
-                DateDebut = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc),
-                DateFin = new DateTime(2024, 3, 15, 23, 59, 59, DateTimeKind.Utc),
-                DateDebutSoireeCloture = new DateTime(2024, 3, 14, 18, 0, 0, DateTimeKind.Utc),
-                EstPublie = true,
-                EstTermine = true,
-                PasMise = 10,
-                PasLot = 1
-            };
-            context.Encans.Add(encanPasse1);
-            await context.SaveChangesAsync();
-            
-            // Ajouter des lots vendus
-            var lotsPasse1 = new[]
-            {
-                new Lot
+                Console.WriteLine("Seeding mediums...");
+                var mediums = new[]
                 {
-                    Numero = "PAST-001",
-                    Artiste = "Vincent van Gogh",
-                    Description = "Nature morte aux tournesols",
-                    DateCreation = new DateTime(1888, 8, 1),
-                    Largeur = 95,
-                    Hauteur = 73,
-                    PrixOuverture = 50000,
-                    PrixMinPourVente = 45000,
-                    ValeurEstimeMin = 60000,
-                    ValeurEstimeMax = 80000,
-                    IdCategorie = categoriePeinture.Id,
-                    IdMedium = mediumHuile.Id,
-                    EstLivrable = false,
-                    EstVendu = true,
-                    Mise = 75000,
-                    DateFinVente = new DateTime(2024, 3, 10, 14, 30, 0, DateTimeKind.Utc)
-                }
-            };
-            context.Lots.AddRange(lotsPasse1);
-            await context.SaveChangesAsync();
-            
-            foreach (var lot in lotsPasse1)
-            {
-                context.EncanLots.Add(new EncanLot
-                {
-                    IdEncan = encanPasse1.Id,
-                    IdLot = lot.Id
-                });
+                    new Medium { Type = "Huile sur toile" },
+                    new Medium { Type = "Acrylique" },
+                    new Medium { Type = "Aquarelle" },
+                    new Medium { Type = "Bronze" },
+                    new Medium { Type = "Marbre" },
+                    new Medium { Type = "Photographie numérique" },
+                    new Medium { Type = "Technique mixte" }
+                };
+                context.Mediums.AddRange(mediums);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Mediums seeded.");
             }
-            await context.SaveChangesAsync();
-            Console.WriteLine("Past encan 1 created with lots.");
             
-            // Encan passé 2 (Jun-Aug 2024)
-            Console.WriteLine("Creating past encan 2...");
-            var encanPasse2 = new Encan
+            // Créer les encans seulement s'ils n'existent pas
+            if (!await context.Encans.AnyAsync())
             {
-                NumeroEncan = 3,
-                    DateDebut = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-                    DateFin = new DateTime(2024, 8, 31, 23, 59, 59, DateTimeKind.Utc),
-                    DateDebutSoireeCloture = new DateTime(2024, 8, 30, 18, 0, 0, DateTimeKind.Utc),
-                    EstPublie = true,
-                    EstTermine = true,
-                    PasMise = 10,
-                    PasLot = 1
-                };
-                context.Encans.Add(encanPasse2);
-                await context.SaveChangesAsync();
-                
-                // Ajouter des lots vendus
-                var lotsPasse2 = new[]
-                {
-                    new Lot
-                    {
-                        Numero = "PAST-002",
-                        Artiste = "Andy Warhol",
-                        Description = "Campbell's Soup Can - Edition limitée",
-                        DateCreation = new DateTime(1962, 1, 1),
-                        Largeur = 50,
-                        Hauteur = 40,
-                        PrixOuverture = 12000,
-                        PrixMinPourVente = 10000,
-                        ValeurEstimeMin = 15000,
-                        ValeurEstimeMax = 25000,
-                        IdCategorie = categoriePeinture.Id,
-                        IdMedium = mediumHuile.Id,
-                        EstLivrable = false,
-                        EstVendu = true,
-                        Mise = 22000,
-                        DateFinVente = new DateTime(2024, 8, 15, 16, 45, 0, DateTimeKind.Utc)
-                    },
-                    new Lot
-                    {
-                        Numero = "PAST-003",
-                        Artiste = "Ansel Adams",
-                        Description = "Moonrise, Hernandez - Tirage original",
-                        DateCreation = new DateTime(1941, 11, 1),
-                        Largeur = 60,
-                        Hauteur = 50,
-                        PrixOuverture = 8000,
-                        PrixMinPourVente = 7000,
-                        ValeurEstimeMin = 10000,
-                        ValeurEstimeMax = 15000,
-                        IdCategorie = categoriePhoto.Id,
-                        IdMedium = mediumPhoto.Id,
-                        EstLivrable = false,
-                        EstVendu = true,
-                        Mise = 13500,
-                        DateFinVente = new DateTime(2024, 8, 20, 11, 20, 0, DateTimeKind.Utc)
-                    }
-                };
-                context.Lots.AddRange(lotsPasse2);
-                await context.SaveChangesAsync();
-                
-                foreach (var lot in lotsPasse2)
-                {
-                    context.EncanLots.Add(new EncanLot
-                    {
-                        IdEncan = encanPasse2.Id,
-                        IdLot = lot.Id
-                    });
-                }
-                await context.SaveChangesAsync();
-                Console.WriteLine("Past encan 2 created with lots.");
-            
-            // Créer 1 encan futur (Oct 2026 - Oct 2028)
-            Console.WriteLine("Creating future encan...");
-            var encanFutur = new Encan
+                Console.WriteLine("Creating all Encans...");
+                // Utiliser notre DatabaseSeeder
+                DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
+            }
+            else
             {
-                NumeroEncan = 4,
-                    DateDebut = new DateTime(2026, 10, 22, 0, 0, 0, DateTimeKind.Utc),
-                    DateFin = new DateTime(2028, 10, 25, 23, 59, 59, DateTimeKind.Utc),
-                    DateDebutSoireeCloture = new DateTime(2028, 10, 24, 18, 0, 0, DateTimeKind.Utc),
-                    EstPublie = true,
-                    EstTermine = false,
-                    PasMise = 10,
-                    PasLot = 1
-                };
-                context.Encans.Add(encanFutur);
-                await context.SaveChangesAsync();
-                
-                // Ajouter des lots pour l'encan futur
-                var lotsFutur = new[]
-                {
-                    new Lot
-                    {
-                        Numero = "FUT-001",
-                        Artiste = "Banksy",
-                        Description = "Girl With Balloon - Œuvre originale sur toile",
-                        DateCreation = new DateTime(2006, 1, 1),
-                        Largeur = 100,
-                        Hauteur = 140,
-                        PrixOuverture = 100000,
-                        PrixMinPourVente = 90000,
-                        ValeurEstimeMin = 150000,
-                        ValeurEstimeMax = 250000,
-                        IdCategorie = categoriePeinture.Id,
-                        IdMedium = mediumHuile.Id,
-                        EstLivrable = true,
-                        EstVendu = false,
-                        Mise = 0
-                    },
-                    new Lot
-                    {
-                        Numero = "FUT-002",
-                        Artiste = "Jeff Koons",
-                        Description = "Balloon Dog - Sculpture en acier inoxydable",
-                        DateCreation = new DateTime(2013, 1, 1),
-                        Largeur = 120,
-                        Hauteur = 100,
-                        PrixOuverture = 200000,
-                        PrixMinPourVente = 180000,
-                        ValeurEstimeMin = 250000,
-                        ValeurEstimeMax = 400000,
-                        IdCategorie = categorieSculpture.Id,
-                        IdMedium = mediumBronze.Id,
-                        EstLivrable = true,
-                        EstVendu = false,
-                        Mise = 0
-                    }
-                };
-                context.Lots.AddRange(lotsFutur);
-                await context.SaveChangesAsync();
-                
-                foreach (var lot in lotsFutur)
-                {
-                    context.EncanLots.Add(new EncanLot
-                    {
-                        IdEncan = encanFutur.Id,
-                        IdLot = lot.Id
-                    });
-                }
-                await context.SaveChangesAsync();
-                Console.WriteLine("Future encan created with lots.");
+                Console.WriteLine("Encans already exist, skipping seeding.");
+            }
             
-            Console.WriteLine("Encans seeding completed.");
             
             Console.WriteLine("Database seeding completed.");
         }
