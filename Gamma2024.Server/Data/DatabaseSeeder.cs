@@ -623,98 +623,98 @@ namespace Gamma2024.Server.Data
             context.EncanLots.AddRange(encanLots);
             context.SaveChanges();
 
-            // Ajouter BEAUCOUP de photos (2-3 par lot)
+            // Ajouter BEAUCOUP de photos avec des URLs Placeholder d'Internet
             var photos = new[]
             {
                 // Photos pour LOT-001 (Picasso)
-                new Photo { Id = 1, IdLot = 1, Lien = "/images/lots/lot001_1.jpg" },
-                new Photo { Id = 2, IdLot = 1, Lien = "/images/lots/lot001_2.jpg" },
-                new Photo { Id = 3, IdLot = 1, Lien = "/images/lots/lot001_detail.jpg" },
+                new Photo { Id = 1, IdLot = 1, Lien = "https://via.placeholder.com/800x600/FF6B6B/FFFFFF?text=Picasso+Nature+Morte" },
+                new Photo { Id = 2, IdLot = 1, Lien = "https://via.placeholder.com/800x600/4ECDC4/FFFFFF?text=Picasso+Detail" },
+                new Photo { Id = 3, IdLot = 1, Lien = "https://via.placeholder.com/800x600/45B7D1/FFFFFF?text=Picasso+Signature" },
 
                 // Photos pour LOT-002 (Monet)
-                new Photo { Id = 4, IdLot = 2, Lien = "/images/lots/lot002_1.jpg" },
-                new Photo { Id = 5, IdLot = 2, Lien = "/images/lots/lot002_2.jpg" },
-                new Photo { Id = 6, IdLot = 2, Lien = "/images/lots/lot002_signature.jpg" },
+                new Photo { Id = 4, IdLot = 2, Lien = "https://via.placeholder.com/800x600/96CEB4/FFFFFF?text=Monet+Jardin" },
+                new Photo { Id = 5, IdLot = 2, Lien = "https://via.placeholder.com/800x600/DDA0DD/FFFFFF?text=Monet+Giverny" },
+                new Photo { Id = 6, IdLot = 2, Lien = "https://via.placeholder.com/800x600/98D8C8/FFFFFF?text=Monet+Impression" },
 
                 // Photos pour LOT-003 (Van Gogh)
-                new Photo { Id = 7, IdLot = 3, Lien = "/images/lots/lot003_1.jpg" },
-                new Photo { Id = 8, IdLot = 3, Lien = "/images/lots/lot003_2.jpg" },
+                new Photo { Id = 7, IdLot = 3, Lien = "https://via.placeholder.com/800x600/F7DC6F/333333?text=Van+Gogh+Champ" },
+                new Photo { Id = 8, IdLot = 3, Lien = "https://via.placeholder.com/800x600/F8C471/333333?text=Van+Gogh+Corbeaux" },
 
                 // Photos pour LOT-004 (Da Vinci)
-                new Photo { Id = 9, IdLot = 4, Lien = "/images/lots/lot004_1.jpg" },
-                new Photo { Id = 10, IdLot = 4, Lien = "/images/lots/lot004_2.jpg" },
-                new Photo { Id = 11, IdLot = 4, Lien = "/images/lots/lot004_detail.jpg" },
+                new Photo { Id = 9, IdLot = 4, Lien = "https://via.placeholder.com/800x600/D2B48C/FFFFFF?text=Mona+Lisa+Copy" },
+                new Photo { Id = 10, IdLot = 4, Lien = "https://via.placeholder.com/800x600/8B7355/FFFFFF?text=Da+Vinci+Portrait" },
+                new Photo { Id = 11, IdLot = 4, Lien = "https://via.placeholder.com/800x600/A0522D/FFFFFF?text=Da+Vinci+Detail" },
 
                 // Photos pour LOT-005 (Matisse)
-                new Photo { Id = 12, IdLot = 5, Lien = "/images/lots/lot005_1.jpg" },
-                new Photo { Id = 13, IdLot = 5, Lien = "/images/lots/lot005_2.jpg" },
+                new Photo { Id = 12, IdLot = 5, Lien = "https://via.placeholder.com/800x600/FF69B4/FFFFFF?text=Matisse+Femme" },
+                new Photo { Id = 13, IdLot = 5, Lien = "https://via.placeholder.com/800x600/FF1493/FFFFFF?text=Matisse+Fauvisme" },
 
                 // Photos pour LOT-006 (Dalí)
-                new Photo { Id = 14, IdLot = 6, Lien = "/images/lots/lot006_1.jpg" },
-                new Photo { Id = 15, IdLot = 6, Lien = "/images/lots/lot006_2.jpg" },
-                new Photo { Id = 16, IdLot = 6, Lien = "/images/lots/lot006_detail.jpg" },
+                new Photo { Id = 14, IdLot = 6, Lien = "https://via.placeholder.com/800x600/FF8C00/333333?text=Dali+Persistence" },
+                new Photo { Id = 15, IdLot = 6, Lien = "https://via.placeholder.com/800x600/FF6347/FFFFFF?text=Dali+Surrealism" },
+                new Photo { Id = 16, IdLot = 6, Lien = "https://via.placeholder.com/800x600/FFA500/333333?text=Dali+Melting" },
 
                 // Photos pour LOT-007 (Pollock)
-                new Photo { Id = 17, IdLot = 7, Lien = "/images/lots/lot007_1.jpg" },
-                new Photo { Id = 18, IdLot = 7, Lien = "/images/lots/lot007_2.jpg" },
-                new Photo { Id = 19, IdLot = 7, Lien = "/images/lots/lot007_texture.jpg" },
+                new Photo { Id = 17, IdLot = 7, Lien = "https://via.placeholder.com/800x600/2E2E2E/FFFFFF?text=Pollock+No1" },
+                new Photo { Id = 18, IdLot = 7, Lien = "https://via.placeholder.com/800x600/1C1C1C/FFFFFF?text=Pollock+Dripping" },
+                new Photo { Id = 19, IdLot = 7, Lien = "https://via.placeholder.com/800x600/3C3C3C/FFFFFF?text=Pollock+Texture" },
 
                 // Photos pour LOT-008 (Munch)
-                new Photo { Id = 20, IdLot = 8, Lien = "/images/lots/lot008_1.jpg" },
-                new Photo { Id = 21, IdLot = 8, Lien = "/images/lots/lot008_2.jpg" },
+                new Photo { Id = 20, IdLot = 8, Lien = "https://via.placeholder.com/800x600/FF4500/FFFFFF?text=Munch+Le+Cri" },
+                new Photo { Id = 21, IdLot = 8, Lien = "https://via.placeholder.com/800x600/DC143C/FFFFFF?text=Munch+Expression" },
 
                 // Photos pour LOT-009 (Rodin)
-                new Photo { Id = 22, IdLot = 9, Lien = "/images/lots/lot009_1.jpg" },
-                new Photo { Id = 23, IdLot = 9, Lien = "/images/lots/lot009_2.jpg" },
-                new Photo { Id = 24, IdLot = 9, Lien = "/images/lots/lot009_profile.jpg" },
+                new Photo { Id = 22, IdLot = 9, Lien = "https://via.placeholder.com/800x600/8B4513/FFFFFF?text=Rodin+Penseur" },
+                new Photo { Id = 23, IdLot = 9, Lien = "https://via.placeholder.com/800x600/A0522D/FFFFFF?text=Rodin+Bronze" },
+                new Photo { Id = 24, IdLot = 9, Lien = "https://via.placeholder.com/800x600/6B4423/FFFFFF?text=Rodin+Profile" },
 
                 // Photos pour LOT-010 (Giacometti)
-                new Photo { Id = 25, IdLot = 10, Lien = "/images/lots/lot010_1.jpg" },
-                new Photo { Id = 26, IdLot = 10, Lien = "/images/lots/lot010_2.jpg" },
+                new Photo { Id = 25, IdLot = 10, Lien = "https://via.placeholder.com/800x600/696969/FFFFFF?text=Giacometti+Homme" },
+                new Photo { Id = 26, IdLot = 10, Lien = "https://via.placeholder.com/800x600/808080/FFFFFF?text=Giacometti+Bronze" },
 
                 // Photos pour LOT-011 (Henry Moore)
-                new Photo { Id = 27, IdLot = 11, Lien = "/images/lots/lot011_1.jpg" },
-                new Photo { Id = 28, IdLot = 11, Lien = "/images/lots/lot011_2.jpg" },
-                new Photo { Id = 29, IdLot = 11, Lien = "/images/lots/lot011_detail.jpg" },
+                new Photo { Id = 27, IdLot = 11, Lien = "https://via.placeholder.com/800x600/C0C0C0/333333?text=Moore+Figure" },
+                new Photo { Id = 28, IdLot = 11, Lien = "https://via.placeholder.com/800x600/D3D3D3/333333?text=Moore+Marble" },
+                new Photo { Id = 29, IdLot = 11, Lien = "https://via.placeholder.com/800x600/DCDCDC/333333?text=Moore+Detail" },
 
                 // Photos pour LOT-012 (Ansel Adams)
-                new Photo { Id = 30, IdLot = 12, Lien = "/images/lots/lot012_1.jpg" },
-                new Photo { Id = 31, IdLot = 12, Lien = "/images/lots/lot012_2.jpg" },
+                new Photo { Id = 30, IdLot = 12, Lien = "https://via.placeholder.com/800x600/000000/FFFFFF?text=Adams+Moonrise" },
+                new Photo { Id = 31, IdLot = 12, Lien = "https://via.placeholder.com/800x600/2F4F4F/FFFFFF?text=Adams+Photography" },
 
                 // Photos pour LOT-013 (Georgia O'Keeffe)
-                new Photo { Id = 32, IdLot = 13, Lien = "/images/lots/lot013_1.jpg" },
-                new Photo { Id = 33, IdLot = 13, Lien = "/images/lots/lot013_2.jpg" },
+                new Photo { Id = 32, IdLot = 13, Lien = "https://via.placeholder.com/800x600/FF69B4/FFFFFF?text=OKeeffe+Red+Canna" },
+                new Photo { Id = 33, IdLot = 13, Lien = "https://via.placeholder.com/800x600/FFB6C1/333333?text=OKeeffe+Modernism" },
 
                 // Photos pour LOT-014 (M.C. Escher)
-                new Photo { Id = 34, IdLot = 14, Lien = "/images/lots/lot014_1.jpg" },
-                new Photo { Id = 35, IdLot = 14, Lien = "/images/lots/lot014_2.jpg" },
+                new Photo { Id = 34, IdLot = 14, Lien = "https://via.placeholder.com/800x600/4169E1/FFFFFF?text=Escher+Relativity" },
+                new Photo { Id = 35, IdLot = 14, Lien = "https://via.placeholder.com/800x600/0000CD/FFFFFF?text=Escher+Lithograph" },
 
                 // Photos pour LOT-015 (Frida Kahlo)
-                new Photo { Id = 36, IdLot = 15, Lien = "/images/lots/lot015_1.jpg" },
-                new Photo { Id = 37, IdLot = 15, Lien = "/images/lots/lot015_2.jpg" },
-                new Photo { Id = 38, IdLot = 15, Lien = "/images/lots/lot015_detail.jpg" },
+                new Photo { Id = 36, IdLot = 15, Lien = "https://via.placeholder.com/800x600/8B008B/FFFFFF?text=Frida+Autoportrait" },
+                new Photo { Id = 37, IdLot = 15, Lien = "https://via.placeholder.com/800x600/9932CC/FFFFFF?text=Frida+Epines" },
+                new Photo { Id = 38, IdLot = 15, Lien = "https://via.placeholder.com/800x600/BA55D3/FFFFFF?text=Frida+Detail" },
 
                 // Photos pour LOT-016 (Andy Warhol)
-                new Photo { Id = 39, IdLot = 16, Lien = "/images/lots/lot016_1.jpg" },
-                new Photo { Id = 40, IdLot = 16, Lien = "/images/lots/lot016_2.jpg" },
+                new Photo { Id = 39, IdLot = 16, Lien = "https://via.placeholder.com/800x600/FF1493/FFFFFF?text=Warhol+Soup+Cans" },
+                new Photo { Id = 40, IdLot = 16, Lien = "https://via.placeholder.com/800x600/FF69B4/FFFFFF?text=Warhol+Pop+Art" },
 
                 // Photos pour LOT-017 (Banksy)
-                new Photo { Id = 41, IdLot = 17, Lien = "/images/lots/lot017_1.jpg" },
-                new Photo { Id = 42, IdLot = 17, Lien = "/images/lots/lot017_2.jpg" },
+                new Photo { Id = 41, IdLot = 17, Lien = "https://via.placeholder.com/800x600/DC143C/FFFFFF?text=Banksy+Girl+Balloon" },
+                new Photo { Id = 42, IdLot = 17, Lien = "https://via.placeholder.com/800x600/B22222/FFFFFF?text=Banksy+Street+Art" },
 
                 // Photos pour LOT-018 (Yves Klein)
-                new Photo { Id = 43, IdLot = 18, Lien = "/images/lots/lot018_1.jpg" },
-                new Photo { Id = 44, IdLot = 18, Lien = "/images/lots/lot018_2.jpg" },
-                new Photo { Id = 45, IdLot = 18, Lien = "/images/lots/lot018_blue.jpg" },
+                new Photo { Id = 43, IdLot = 18, Lien = "https://via.placeholder.com/800x600/0033FF/FFFFFF?text=Klein+IKB+191" },
+                new Photo { Id = 44, IdLot = 18, Lien = "https://via.placeholder.com/800x600/002FA7/FFFFFF?text=Klein+Blue" },
+                new Photo { Id = 45, IdLot = 18, Lien = "https://via.placeholder.com/800x600/0047AB/FFFFFF?text=Klein+International" },
 
                 // Photos pour LOT-019 (Kaws)
-                new Photo { Id = 46, IdLot = 19, Lien = "/images/lots/lot019_1.jpg" },
-                new Photo { Id = 47, IdLot = 19, Lien = "/images/lots/lot019_2.jpg" },
+                new Photo { Id = 46, IdLot = 19, Lien = "https://via.placeholder.com/800x600/FF1493/FFFFFF?text=Kaws+Companion" },
+                new Photo { Id = 47, IdLot = 19, Lien = "https://via.placeholder.com/800x600/FF69B4/333333?text=Kaws+Sculpture" },
 
                 // Photos pour LOT-020 (Takashi Murakami)
-                new Photo { Id = 48, IdLot = 20, Lien = "/images/lots/lot020_1.jpg" },
-                new Photo { Id = 49, IdLot = 20, Lien = "/images/lots/lot020_2.jpg" },
-                new Photo { Id = 50, IdLot = 20, Lien = "/images/lots/lot020_colors.jpg" }
+                new Photo { Id = 48, IdLot = 20, Lien = "https://via.placeholder.com/800x600/FFD700/333333?text=Murakami+Cherry" },
+                new Photo { Id = 49, IdLot = 20, Lien = "https://via.placeholder.com/800x600/FFC0CB/333333?text=Murakami+Blossom" },
+                new Photo { Id = 50, IdLot = 20, Lien = "https://via.placeholder.com/800x600/FFB6C1/333333?text=Murakami+Colors" }
             };
 
             context.Photos.AddRange(photos);
