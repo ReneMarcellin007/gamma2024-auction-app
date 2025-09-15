@@ -9,6 +9,7 @@
     "build:staging": "vite build --mode staging --base=/2162067",
     "build:prod": "vite build --mode production --base=/2135621",
     "build:railway": "vite build --mode production",
+    "build:render": "vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },

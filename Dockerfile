@@ -28,9 +28,9 @@ COPY . .
 # Build Vue.js frontend manually
 WORKDIR /src/gamma2024.client
 RUN npm install
-# Use Railway environment file for production build
-COPY gamma2024.client/.env.railway .env.production
-RUN npm run build:railway
+# Use Render environment file for production build
+COPY gamma2024.client/.env.render .env.production
+RUN npm run build:render
 
 # Backup Images folder, clear wwwroot completely, copy Vue.js build (keep images and icons folders), restore Images
 RUN mkdir -p /tmp/backup && \

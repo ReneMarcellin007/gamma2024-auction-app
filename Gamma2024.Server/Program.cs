@@ -30,24 +30,25 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     else
     {
         // Debug: afficher les variables d'environnement disponibles
-        Console.WriteLine("=== DEBUG Railway Environment Variables ===");
+        Console.WriteLine("=== DEBUG Environment Variables (Render/Railway) ===");
         Console.WriteLine($"DATABASE_URL: {Environment.GetEnvironmentVariable("DATABASE_URL")}");
+        Console.WriteLine($"DATABASE_PUBLIC_URL: {Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL")}");
         Console.WriteLine($"PGDATABASE: {Environment.GetEnvironmentVariable("PGDATABASE")}");
         Console.WriteLine($"PGHOST: {Environment.GetEnvironmentVariable("PGHOST")}");
         Console.WriteLine($"PGPORT: {Environment.GetEnvironmentVariable("PGPORT")}");
         Console.WriteLine($"PGUSER: {Environment.GetEnvironmentVariable("PGUSER")}");
         Console.WriteLine($"PGPASSWORD: {Environment.GetEnvironmentVariable("PGPASSWORD")}");
         
-        // Railway fournit DATABASE_PUBLIC_URL ou DATABASE_URL
+        // Render utilise DATABASE_URL, Railway utilise DATABASE_PUBLIC_URL ou DATABASE_URL
         var connectionString = "";
         
-        // Essayer DATABASE_PUBLIC_URL en premier (Railway l'utilise)
-        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL") 
-                       ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+        // Priorité: DATABASE_URL (Render), puis DATABASE_PUBLIC_URL (Railway)
+        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL") 
+                       ?? Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
         
-        Console.WriteLine("=== Railway Database Configuration ===");
-        Console.WriteLine($"DATABASE_PUBLIC_URL: {(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL")) ? "Set" : "Not set")}");
+        Console.WriteLine("=== Database Configuration (Render/Railway) ===");
         Console.WriteLine($"DATABASE_URL: {(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_URL")) ? "Set" : "Not set")}");
+        Console.WriteLine($"DATABASE_PUBLIC_URL: {(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL")) ? "Set" : "Not set")}");
         
         if (!string.IsNullOrEmpty(databaseUrl))
         {
@@ -138,7 +139,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedAccount = false; // FIXÉ: Permettre la connexion sans confirmation email
     options.User.RequireUniqueEmail = true;
 })
     .AddRoles<IdentityRole>()
@@ -178,10 +179,13 @@ var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<
 
 builder.Services.AddHttpClient("ApiClient", (serviceProvider, client) =>
 {
-    // URL de production hardcodée
-    var apiUrl = "https://sqlinfocg.cegepgranby.qc.ca/2162067/";
+    // URL dynamique selon l'environnement
+    var apiUrl = builder.Environment.IsDevelopment() 
+        ? "https://localhost:5001/" 
+        : Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL") ?? "https://sqlinfocg.cegepgranby.qc.ca/2162067/";
+    
     client.BaseAddress = new Uri(apiUrl);
-    logger.LogInformation($"API Client configuré avec l'URL hardcodée: {apiUrl}");
+    logger.LogInformation($"API Client configuré avec l'URL: {apiUrl}");
 });
 
 
@@ -476,11 +480,12 @@ else
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configurer le port pour Railway
+// Configurer le port pour Render/Railway (tous les deux utilisent PORT)
 if (!app.Environment.IsDevelopment())
 {
     var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
     app.Urls.Add($"http://0.0.0.0:{port}");
+    Console.WriteLine($"App configured to listen on port: {port}");
 }
 
 // Health check endpoint pour tester la connexion DB
