@@ -36,6 +36,21 @@ namespace Gamma2024.Server.Data
 
         private void ConfigureRelationships(ModelBuilder builder)
         {
+            // Configure PostgreSQL-compatible table names (lowercase with underscores)
+            builder.Entity<Encan>().ToTable("encans");
+            builder.Entity<Lot>().ToTable("lots");
+            builder.Entity<Categorie>().ToTable("categories");
+            builder.Entity<Photo>().ToTable("photos");
+            builder.Entity<Facture>().ToTable("factures");
+            builder.Entity<FactureLivraison>().ToTable("facture_livraisons");
+            builder.Entity<Vendeur>().ToTable("vendeurs");
+            builder.Entity<Adresse>().ToTable("adresses");
+            builder.Entity<Medium>().ToTable("mediums");
+            builder.Entity<Charite>().ToTable("charites");
+            builder.Entity<MiseAutomatique>().ToTable("mise_automatiques");
+            builder.Entity<Notification>().ToTable("notifications");
+            builder.Entity<EncanLot>().ToTable("encan_lots");
+            
             builder.Entity<Encan>()
                 .HasIndex(e => e.NumeroEncan)
                 .IsUnique();
