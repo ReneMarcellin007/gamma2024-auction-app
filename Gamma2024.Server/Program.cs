@@ -128,7 +128,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(connectionString)
                    .UseSnakeCaseNamingConvention(); // CRUCIAL: Force snake_case for PostgreSQL compatibility
-            Console.WriteLine("Successfully configured PostgreSQL connection with snake_case naming");
+            Console.WriteLine("Successfully configured PostgreSQL connection with snake_case naming convention");
         }
         catch (Exception ex)
         {
