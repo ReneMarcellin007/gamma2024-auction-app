@@ -57,22 +57,12 @@ namespace Gamma2024.Server.Data
             };
             context.Mediums.AddRange(mediums);
 
-            // Créer d'abord des adresses pour les vendeurs
-            var adressesVendeurs = new[]
-            {
-                new Adresse { Id = 100, Numero = 100, Rue = "Rue des Artistes", Ville = "Montréal", Province = "Québec", Pays = "Canada", CodePostal = "H1H1H1", EstDomicile = false },
-                new Adresse { Id = 101, Numero = 200, Rue = "Avenue des Peintres", Ville = "Québec", Province = "Québec", Pays = "Canada", CodePostal = "G1G1G1", EstDomicile = false },
-                new Adresse { Id = 102, Numero = 300, Rue = "Boulevard des Arts", Ville = "Sherbrooke", Province = "Québec", Pays = "Canada", CodePostal = "J1J1J1", EstDomicile = false }
-            };
-            context.Adresses.AddRange(adressesVendeurs);
-            context.SaveChanges();
-            
-            // Ajouter les vendeurs avec TOUS les champs obligatoires
+            // Ajouter les vendeurs SANS adresses car elles créent des conflits
             var vendeurs = new[]
             {
-                new Vendeur { Id = 1, Nom = "Dupont", Prenom = "Jean", Courriel = "jean.dupont@vendeur.com", Telephone = "514-555-0001", AdresseId = 100 },
-                new Vendeur { Id = 2, Nom = "Martin", Prenom = "Marie", Courriel = "marie.martin@vendeur.com", Telephone = "418-555-0002", AdresseId = 101 },
-                new Vendeur { Id = 3, Nom = "Leblanc", Prenom = "Pierre", Courriel = "pierre.leblanc@vendeur.com", Telephone = "819-555-0003", AdresseId = 102 }
+                new Vendeur { Id = 1, Nom = "Dupont", Prenom = "Jean", Courriel = "jean.dupont@vendeur.com", Telephone = "514-555-0001" },
+                new Vendeur { Id = 2, Nom = "Martin", Prenom = "Marie", Courriel = "marie.martin@vendeur.com", Telephone = "418-555-0002" },
+                new Vendeur { Id = 3, Nom = "Leblanc", Prenom = "Pierre", Courriel = "pierre.leblanc@vendeur.com", Telephone = "819-555-0003" }
             };
             context.Vendeurs.AddRange(vendeurs);
 
