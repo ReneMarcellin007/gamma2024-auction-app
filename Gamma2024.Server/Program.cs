@@ -297,14 +297,20 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+Console.WriteLine("🚀 APP BUILT SUCCESSFULLY - STARTING DB INITIALIZATION");
+
 // Auto-migration et seeding
-using (var scope = app.Services.CreateScope())
+try 
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    
-    Console.WriteLine("=== Database initialization ===");
+    Console.WriteLine("🔧 CREATING SERVICE SCOPE...");
+    using (var scope = app.Services.CreateScope())
+    {
+        Console.WriteLine("🔧 GETTING SERVICES...");
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        
+        Console.WriteLine("=== 🎯 DATABASE INITIALIZATION STARTING ===");
     Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
     
     try
@@ -450,6 +456,18 @@ using (var scope = app.Services.CreateScope())
         // Don't throw - let the app start even if DB init fails
         // This allows us to see health endpoint errors
     }
+    }
+}
+catch (Exception scopeEx)
+{
+    Console.WriteLine($"💥 CRITICAL ERROR IN SERVICE SCOPE CREATION: {scopeEx.Message}");
+    Console.WriteLine($"💥 EXCEPTION TYPE: {scopeEx.GetType().Name}");
+    Console.WriteLine($"💥 STACK TRACE: {scopeEx.StackTrace}");
+    if (scopeEx.InnerException != null)
+    {
+        Console.WriteLine($"💥 INNER EXCEPTION: {scopeEx.InnerException.Message}");
+    }
+    // Don't throw - let app continue to start
 }
 
 if (app.Environment.IsDevelopment())
