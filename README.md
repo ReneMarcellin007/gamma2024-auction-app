@@ -163,6 +163,6 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 
 ---
 
-© Les Encans de Nantes au Québec {{ new Date().getFullYear() }} par René Tchokomi
+© Les Encans de Nantes au Québec par René Tchokomi
 
 *Développé avec ❤️ en .NET 8 et Vue.js*
