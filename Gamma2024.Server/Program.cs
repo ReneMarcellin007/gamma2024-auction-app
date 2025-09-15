@@ -314,131 +314,128 @@ try
     
     try
     {
-        // Tester la connexion
-        if (await context.Database.CanConnectAsync())
+        Console.WriteLine("🔥 FORCING DATABASE CREATION - BYPASSING CanConnectAsync CHECK");
+        
+        try
         {
-            Console.WriteLine("Database connection successful.");
-            
-            // EN PRODUCTION: RECRÉER LA BASE COMPLÈTEMENT
+            // FORCER la création des tables sans vérifier CanConnectAsync
             if (!app.Environment.IsDevelopment())
             {
-                Console.WriteLine("=== PRODUCTION: RECRÉATION COMPLÈTE DE LA BASE ===");
-                await context.Database.EnsureDeletedAsync();
-                Console.WriteLine("Base de données supprimée.");
+                Console.WriteLine("=== 🚀 PRODUCTION: FORCE CREATE TABLES ===");
                 await context.Database.EnsureCreatedAsync();
-                Console.WriteLine("Base de données recréée.");
+                Console.WriteLine("✅ Tables forcefully created!");
             }
             else
             {
-                // En développement, utiliser EnsureCreated
                 await context.Database.EnsureCreatedAsync();
-                Console.WriteLine("Database ensured created.");
+                Console.WriteLine("✅ Database ensured created in development.");
             }
-            
-            // Créer les rôles de base s'ils n'existent pas
-            Console.WriteLine("Creating default roles...");
-            string[] roles = { "Admin", "Client", "Vendeur" };
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                    Console.WriteLine($"Role '{role}' created.");
-                }
-            }
-            
-            // Créer un admin par défaut s'il n'existe pas
-            var adminEmail = "admin@encans.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            if (adminUser == null)
-            {
-                adminUser = new ApplicationUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true,
-                    Name = "Administrateur",
-                    FirstName = "Admin",
-                    StripeCustomer = ""
-                };
-                
-                var result = await userManager.CreateAsync(adminUser, "Admin123!");
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                    Console.WriteLine("Admin user created.");
-                }
-            }
-            
-            // Seed Categories si elles n'existent pas
-            if (!await context.Categories.AnyAsync())
-            {
-                Console.WriteLine("Seeding categories...");
-                var categories = new[]
-                {
-                    new Categorie { Nom = "Peinture" },
-                    new Categorie { Nom = "Sculpture" },
-                    new Categorie { Nom = "Photographie" },
-                    new Categorie { Nom = "Art numérique" },
-                    new Categorie { Nom = "Dessin" }
-                };
-                context.Categories.AddRange(categories);
-                await context.SaveChangesAsync();
-                Console.WriteLine("Categories seeded.");
-            }
-            
-            // Seed Mediums si ils n'existent pas
-            if (!await context.Mediums.AnyAsync())
-            {
-                Console.WriteLine("Seeding mediums...");
-                var mediums = new[]
-                {
-                    new Medium { Type = "Huile sur toile" },
-                    new Medium { Type = "Acrylique" },
-                    new Medium { Type = "Aquarelle" },
-                    new Medium { Type = "Bronze" },
-                    new Medium { Type = "Marbre" },
-                    new Medium { Type = "Photographie numérique" },
-                    new Medium { Type = "Technique mixte" }
-                };
-                context.Mediums.AddRange(mediums);
-                await context.SaveChangesAsync();
-                Console.WriteLine("Mediums seeded.");
-            }
-            
-            // FORCER LA CRÉATION DES ENCANS ET LOTS TOUJOURS
-            Console.WriteLine("=== FORCER LA CRÉATION DES DONNÉES DE TEST ===");
-            try
-            {
-                DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
-                Console.WriteLine("DatabaseSeeder exécuté avec succès.");
-                
-                // Vérifier les données après le seeding
-                var encanCount = await context.Encans.CountAsync();
-                var lotCount = await context.Lots.CountAsync();
-                var catCount = await context.Categories.CountAsync();
-                Console.WriteLine($"=== DONNÉES CRÉÉES ===");
-                Console.WriteLine($"Encans: {encanCount}");
-                Console.WriteLine($"Lots: {lotCount}");
-                Console.WriteLine($"Catégories: {catCount}");
-            }
-            catch (Exception seedEx)
-            {
-                Console.WriteLine($"ERREUR SEEDER: {seedEx.Message}");
-                Console.WriteLine($"Stack: {seedEx.StackTrace}");
-                if (seedEx.InnerException != null)
-                {
-                    Console.WriteLine($"Inner: {seedEx.InnerException.Message}");
-                }
-            }
-            
-            
-            Console.WriteLine("Database seeding completed.");
         }
-        else
+        catch (Exception createEx)
         {
-            Console.WriteLine("ERROR: Cannot connect to database!");
+            Console.WriteLine($"❌ FAILED TO CREATE TABLES: {createEx.Message}");
+            Console.WriteLine($"❌ Exception Type: {createEx.GetType().Name}");
+            Console.WriteLine($"❌ Stack Trace: {createEx.StackTrace}");
         }
+        
+        // Créer les rôles de base s'ils n'existent pas
+        Console.WriteLine("Creating default roles...");
+        string[] roles = { "Admin", "Client", "Vendeur" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+                Console.WriteLine($"Role '{role}' created.");
+            }
+        }
+        
+        // Créer un admin par défaut s'il n'existe pas
+        var adminEmail = "admin@encans.com";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                Name = "Administrateur",
+                FirstName = "Admin",
+                StripeCustomer = ""
+            };
+            
+            var result = await userManager.CreateAsync(adminUser, "Admin123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+                Console.WriteLine("Admin user created.");
+            }
+        }
+        
+        // Seed Categories si elles n'existent pas
+        if (!await context.Categories.AnyAsync())
+        {
+            Console.WriteLine("Seeding categories...");
+            var categories = new[]
+            {
+                new Categorie { Nom = "Peinture" },
+                new Categorie { Nom = "Sculpture" },
+                new Categorie { Nom = "Photographie" },
+                new Categorie { Nom = "Art numérique" },
+                new Categorie { Nom = "Dessin" }
+            };
+            context.Categories.AddRange(categories);
+            await context.SaveChangesAsync();
+            Console.WriteLine("Categories seeded.");
+        }
+        
+        // Seed Mediums si ils n'existent pas
+        if (!await context.Mediums.AnyAsync())
+        {
+            Console.WriteLine("Seeding mediums...");
+            var mediums = new[]
+            {
+                new Medium { Type = "Huile sur toile" },
+                new Medium { Type = "Acrylique" },
+                new Medium { Type = "Aquarelle" },
+                new Medium { Type = "Bronze" },
+                new Medium { Type = "Marbre" },
+                new Medium { Type = "Photographie numérique" },
+                new Medium { Type = "Technique mixte" }
+            };
+            context.Mediums.AddRange(mediums);
+            await context.SaveChangesAsync();
+            Console.WriteLine("Mediums seeded.");
+        }
+        
+        // FORCER LA CRÉATION DES ENCANS ET LOTS TOUJOURS
+        Console.WriteLine("=== FORCER LA CRÉATION DES DONNÉES DE TEST ===");
+        try
+        {
+            DatabaseSeeder.SeedDatabase(scope.ServiceProvider);
+            Console.WriteLine("DatabaseSeeder exécuté avec succès.");
+            
+            // Vérifier les données après le seeding
+            var encanCount = await context.Encans.CountAsync();
+            var lotCount = await context.Lots.CountAsync();
+            var catCount = await context.Categories.CountAsync();
+            Console.WriteLine($"=== DONNÉES CRÉÉES ===");
+            Console.WriteLine($"Encans: {encanCount}");
+            Console.WriteLine($"Lots: {lotCount}");
+            Console.WriteLine($"Catégories: {catCount}");
+        }
+        catch (Exception seedEx)
+        {
+            Console.WriteLine($"ERREUR SEEDER: {seedEx.Message}");
+            Console.WriteLine($"Stack: {seedEx.StackTrace}");
+            if (seedEx.InnerException != null)
+            {
+                Console.WriteLine($"Inner: {seedEx.InnerException.Message}");
+            }
+        }
+        
+        Console.WriteLine("Database seeding completed.");
     }
     catch (Exception ex)
     {
