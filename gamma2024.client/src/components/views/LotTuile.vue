@@ -173,12 +173,23 @@
         return montant !== undefined && montant !== null && !isNaN(Number(montant));
     };
 
+    // Helper function to handle both relative and absolute URLs
+    const formatImageUrl = (url) => {
+        if (!url) return '';
+        // If URL is already complete (starts with http:// or https://), return as-is
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        // Otherwise, prefix with base URL for relative paths
+        return urlApi.value + url;
+    };
+
     const urlImage = computed(() => {
         const lotStore = store.getters.getLot(props.lotRecu.id);
         if (lotStore?.photos?.[0]?.lien) {
-            return urlApi.value + lotStore.photos[0].lien;
+            return formatImageUrl(lotStore.photos[0].lien);
         }
-        return urlApi.value + props.lotRecu.photos[0].lien;
+        return formatImageUrl(props.lotRecu.photos[0].lien);
     });
 
     const estUtilisateurMiseDepassee = computed(() => {

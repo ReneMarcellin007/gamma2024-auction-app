@@ -36,7 +36,7 @@
                             <div v-for="(image, index) in lot.photos">
                                 <div :class="{active: index==0, 'carousel-item': true}">
                                     <div class="d-flex justify-content-center">
-                                        <img :src="urlApi + image" alt="..." class="w-100">
+                                        <img :src="formatImageUrl(image)" alt="..." class="w-100">
                                     </div>
                                 </div>
                             </div>
@@ -56,7 +56,7 @@
 
                             <div v-for="(image, index) in lot.photos">
                                 <a data-bs-target="#carouselExampleIndicators" :data-bs-slide-to="index" class="active " aria-current="true" :aria-label="'Slide ' + (index+1)" role="button">
-                                    <img :src="urlApi + image" height="60" alt="Image du lot">
+                                    <img :src="formatImageUrl(image)" height="60" alt="Image du lot">
                                 </a>
                             </div>
                         </div>
@@ -86,6 +86,17 @@
     const props = defineProps({
         idLot: String,
     });
+
+    // Helper function to handle both relative and absolute URLs
+    const formatImageUrl = (url) => {
+        if (!url) return '';
+        // If URL is already complete (starts with http:// or https://), return as-is
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        // Otherwise, prefix with base URL for relative paths
+        return urlApi.value + url;
+    };
 
     onMounted(async () => {
         const id = props.idLot;

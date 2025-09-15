@@ -282,6 +282,11 @@
 
     const chercherImageUrl = computed(() => (url) => {
         if (!url) return '';
+        // If URL is already complete (starts with http:// or https://), return as-is
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        // Otherwise, prefix with base URL for relative paths
         const baseUrl = store.state.api.defaults.baseURL.replace('\api', '');
         return baseUrl + url;
     });
