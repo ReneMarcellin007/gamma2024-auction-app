@@ -1,0 +1,42 @@
+databases:
+  # PostgreSQL Database
+  - name: gamma2024-db
+    databaseName: gamma2024
+    user: gamma2024_user
+    plan: starter
+
+services:
+  # Main Web Service
+  - type: web
+    name: gamma2024-web
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gamma2024-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+        length: 32
+      - key: JWT_ISSUER
+        value: Gamma2024
+      - key: JWT_AUDIENCE
+        value: Gamma2024Users
+      - key: STRIPE_PUBLISHABLE_KEY
+        value: pk_test_51QG4bkBo4zemt5FbOzjmeA42wV92EmYQUvwF020QylGbpdkMWqyoCrz8GBT3iZ99pEGQm5djnrTPirXWP0rDTzFG00BmJmbxA1
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.ethereal.email
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        value: elbert.volkman@ethereal.email
+      - key: EMAIL_PASSWORD
+        sync: false
