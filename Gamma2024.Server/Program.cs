@@ -296,7 +296,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-Console.WriteLine("🚀 APP BUILT SUCCESSFULLY - STARTING DB INITIALIZATION");
+Console.WriteLine("🚀 APP BUILT SUCCESSFULLY - STARTING DB INITIALIZATION v2.0");
 
 // Auto-migration et seeding
 try 
