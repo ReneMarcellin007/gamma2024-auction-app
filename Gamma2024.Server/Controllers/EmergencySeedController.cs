@@ -28,7 +28,53 @@ namespace Gamma2024.Server.Controllers
                 await _context.Database.ExecuteSqlRawAsync("DELETE FROM encan_lots");
                 await _context.Database.ExecuteSqlRawAsync("DELETE FROM lots");
                 await _context.Database.ExecuteSqlRawAsync("DELETE FROM encans");
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM categories");
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM mediums");
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM vendeurs");
                 Console.WriteLine("✅ Tables nettoyées");
+
+                // Créer les catégories nécessaires
+                if (!await _context.Categories.AnyAsync())
+                {
+                    var categories = new[]
+                    {
+                        new Categorie { Nom = "Peinture" },
+                        new Categorie { Nom = "Sculpture" },
+                        new Categorie { Nom = "Photographie" }
+                    };
+                    await _context.Categories.AddRangeAsync(categories);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine("✅ Catégories créées");
+                }
+
+                // Créer les médiums nécessaires
+                if (!await _context.Mediums.AnyAsync())
+                {
+                    var mediums = new[]
+                    {
+                        new Medium { Type = "Huile sur toile" },
+                        new Medium { Type = "Acrylique" },
+                        new Medium { Type = "Bronze" }
+                    };
+                    await _context.Mediums.AddRangeAsync(mediums);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine("✅ Médiums créés");
+                }
+
+                // Créer un vendeur par défaut
+                if (!await _context.Vendeurs.AnyAsync())
+                {
+                    var vendeur = new Vendeur
+                    {
+                        Nom = "Vendeur",
+                        Prenom = "Test",
+                        Courriel = "test@test.com",
+                        Telephone = "555-0001"
+                    };
+                    await _context.Vendeurs.AddRangeAsync(vendeur);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine("✅ Vendeur créé");
+                }
 
                 // Créer 3 encans simples
                 var encans = new List<Encan>
@@ -72,6 +118,11 @@ namespace Gamma2024.Server.Controllers
                 await _context.SaveChangesAsync();
                 Console.WriteLine($"✅ {encans.Count} encans créés");
 
+                // Récupérer les IDs créés
+                var categorieId = (await _context.Categories.FirstAsync()).Id;
+                var mediumId = (await _context.Mediums.FirstAsync()).Id;
+                var vendeurId = (await _context.Vendeurs.FirstAsync()).Id;
+
                 // Créer des lots simples
                 var lots = new List<Lot>();
                 var photosList = new List<Photo>();
@@ -92,9 +143,9 @@ namespace Gamma2024.Server.Controllers
                         Mise = i <= 4 ? 600 * i : 0,
                         EstVendu = false,
                         EstLivrable = true,
-                        IdCategorie = 1,
-                        IdMedium = 1,
-                        IdVendeur = 1,
+                        IdCategorie = categorieId,
+                        IdMedium = mediumId,
+                        IdVendeur = vendeurId,
                         Hauteur = 60,
                         Largeur = 80,
                         DateCreation = DateTime.UtcNow,
@@ -121,9 +172,9 @@ namespace Gamma2024.Server.Controllers
                         EstVendu = true,
                         DateFinVente = DateTime.UtcNow.AddDays(-15),
                         EstLivrable = true,
-                        IdCategorie = 1,
-                        IdMedium = 1,
-                        IdVendeur = 1,
+                        IdCategorie = categorieId,
+                        IdMedium = mediumId,
+                        IdVendeur = vendeurId,
                         Hauteur = 60,
                         Largeur = 80,
                         DateCreation = DateTime.UtcNow.AddDays(-40),
@@ -147,9 +198,9 @@ namespace Gamma2024.Server.Controllers
                         Mise = 0,
                         EstVendu = false,
                         EstLivrable = true,
-                        IdCategorie = 1,
-                        IdMedium = 1,
-                        IdVendeur = 1,
+                        IdCategorie = categorieId,
+                        IdMedium = mediumId,
+                        IdVendeur = vendeurId,
                         Hauteur = 60,
                         Largeur = 80,
                         DateCreation = DateTime.UtcNow,
