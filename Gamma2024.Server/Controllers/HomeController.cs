@@ -35,29 +35,32 @@ namespace Gamma2024.Server.Controllers
 
         // Endpoint alternatif pour contourner le problème du caractère ! en JSON
         [HttpPost("login-safe")]
-        public async Task<IActionResult> LoginSafe([FromBody] dynamic data)
+        public async Task<IActionResult> LoginSafe([FromBody] LoginSafeVM data)
         {
             try
             {
-                string emailOuPseudo = data?.emailOuPseudo?.ToString() ?? "";
-                string passwordBase64 = data?.passwordBase64?.ToString() ?? "";
+                _logger.LogInformation($"Login-safe attempt for: {data?.EmailOuPseudo}");
 
-                if (string.IsNullOrEmpty(emailOuPseudo) || string.IsNullOrEmpty(passwordBase64))
+                if (string.IsNullOrEmpty(data?.EmailOuPseudo) || string.IsNullOrEmpty(data?.PasswordBase64))
                 {
+                    _logger.LogWarning("Email ou mot de passe manquant");
                     return BadRequest(new { element = "validation", message = "Email et mot de passe requis" });
                 }
 
                 // Décoder le mot de passe depuis Base64
-                byte[] passwordBytes = Convert.FromBase64String(passwordBase64);
+                byte[] passwordBytes = Convert.FromBase64String(data.PasswordBase64);
                 string password = System.Text.Encoding.UTF8.GetString(passwordBytes);
 
-                var model = new LoginVM { EmailOuPseudo = emailOuPseudo, Password = password };
+                _logger.LogInformation($"Password decoded successfully, length: {password.Length}");
+
+                var model = new LoginVM { EmailOuPseudo = data.EmailOuPseudo, Password = password };
                 return await ProcessLogin(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Erreur login-safe: {ex.Message}");
-                return BadRequest(new { element = "error", message = "Erreur de décodage" });
+                _logger.LogError($"Stack trace: {ex.StackTrace}");
+                return BadRequest(new { element = "error", message = "Erreur de décodage", details = ex.Message });
             }
         }
 
