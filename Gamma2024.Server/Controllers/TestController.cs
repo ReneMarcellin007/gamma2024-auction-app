@@ -98,5 +98,67 @@ namespace Gamma2024.Server.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpPost("fix-users-stripe")]
+        public async Task<IActionResult> FixUsersWithStripe()
+        {
+            try
+            {
+                Console.WriteLine("🔑 CORRECTION UTILISATEURS AVEC STRIPE");
+
+                // Supprimer les utilisateurs existants
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM \"AspNetUserRoles\" WHERE \"UserId\" IN ('client-uuid-final', 'admin-uuid-final')");
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM \"AspNetUsers\" WHERE \"Email\" IN ('client@example.com', 'admin@example.com')");
+
+                // CLIENT avec StripeCustomer
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUsers"" (""Id"", ""UserName"", ""NormalizedUserName"", ""Email"", ""NormalizedEmail"", ""EmailConfirmed"", ""PasswordHash"", ""SecurityStamp"", ""ConcurrencyStamp"", ""PhoneNumber"", ""PhoneNumberConfirmed"", ""TwoFactorEnabled"", ""LockoutEnd"", ""LockoutEnabled"", ""AccessFailedCount"", ""Name"", ""FirstName"", ""Avatar"", ""StripeCustomer"")
+                    VALUES
+                    ('client-uuid-final', 'client@example.com', 'CLIENT@EXAMPLE.COM', 'client@example.com', 'CLIENT@EXAMPLE.COM', true,
+                    'AQAAAAIAAYagAAAAEBCLhDAVClAVnNnHmZ3ahe6KYsdJa/tTtcmHC64QlZsy07wt7VRMIl+nfrP0UJ8oKw==',
+                    'security-final-client', 'concurrency-final-client', NULL, false, false, NULL, true, 0,
+                    'Client', 'Test', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', 'cus_client_default')
+                ");
+
+                // ADMIN avec StripeCustomer
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUsers"" (""Id"", ""UserName"", ""NormalizedUserName"", ""Email"", ""NormalizedEmail"", ""EmailConfirmed"", ""PasswordHash"", ""SecurityStamp"", ""ConcurrencyStamp"", ""PhoneNumber"", ""PhoneNumberConfirmed"", ""TwoFactorEnabled"", ""LockoutEnd"", ""LockoutEnabled"", ""AccessFailedCount"", ""Name"", ""FirstName"", ""Avatar"", ""StripeCustomer"")
+                    VALUES
+                    ('admin-uuid-final', 'admin@example.com', 'ADMIN@EXAMPLE.COM', 'admin@example.com', 'ADMIN@EXAMPLE.COM', true,
+                    'AQAAAAIAAYagAAAAEImrQqIdpN3WKyTx0Ys/9QQXVKT5jTAyfxsPYj6ljA7MwE8U/IWotqFi5RT5o5V7VQ==',
+                    'security-final-admin', 'concurrency-final-admin', NULL, false, false, NULL, true, 0,
+                    'Admin', 'System', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 'cus_admin_default')
+                ");
+
+                // Ajouter les rôles
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUserRoles"" (""UserId"", ""RoleId"")
+                    SELECT 'client-uuid-final', ""Id"" FROM ""AspNetRoles"" WHERE ""Name"" = 'Client'
+                ");
+
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUserRoles"" (""UserId"", ""RoleId"")
+                    SELECT 'admin-uuid-final', ""Id"" FROM ""AspNetRoles"" WHERE ""Name"" = 'Admin'
+                ");
+
+                Console.WriteLine("✅ Utilisateurs créés avec StripeCustomer!");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Utilisateurs créés avec StripeCustomer!",
+                    users = new[]
+                    {
+                        "CLIENT: client@example.com / MotDePasseClient123!",
+                        "ADMIN: admin@example.com / MotDePasseAdmin123!"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erreur: {ex.Message}");
+                return BadRequest(new { error = ex.Message, details = ex.StackTrace });
+            }
+        }
     }
 }
