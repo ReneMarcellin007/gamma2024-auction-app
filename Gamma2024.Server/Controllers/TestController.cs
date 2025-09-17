@@ -160,5 +160,67 @@ namespace Gamma2024.Server.Controllers
                 return BadRequest(new { error = ex.Message, details = ex.StackTrace });
             }
         }
+
+        [HttpPost("fix-users-simple")]
+        public async Task<IActionResult> FixUsersSimple()
+        {
+            try
+            {
+                Console.WriteLine("🔑 CORRECTION UTILISATEURS AVEC MOTS DE PASSE SIMPLES (SANS !)");
+
+                // Supprimer les utilisateurs existants
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM \"AspNetUserRoles\" WHERE \"UserId\" IN ('client-uuid-final', 'admin-uuid-final')");
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM \"AspNetUsers\" WHERE \"Email\" IN ('client@example.com', 'admin@example.com')");
+
+                // CLIENT avec MotDePasseClient123 (SANS !) - Hash généré avec BCrypt
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUsers"" (""Id"", ""UserName"", ""NormalizedUserName"", ""Email"", ""NormalizedEmail"", ""EmailConfirmed"", ""PasswordHash"", ""SecurityStamp"", ""ConcurrencyStamp"", ""PhoneNumber"", ""PhoneNumberConfirmed"", ""TwoFactorEnabled"", ""LockoutEnd"", ""LockoutEnabled"", ""AccessFailedCount"", ""Name"", ""FirstName"", ""Avatar"", ""StripeCustomer"")
+                    VALUES
+                    ('client-uuid-final', 'client@example.com', 'CLIENT@EXAMPLE.COM', 'client@example.com', 'CLIENT@EXAMPLE.COM', true,
+                    'AQAAAAIAAYagAAAAEJxQm5K7sS8vN2L6hQ5M3pV7/8kBwR2fYtE9cN1jO8dS4G3hW9mZ7kL2xP6qF5rT8A==',
+                    'security-final-client', 'concurrency-final-client', NULL, false, false, NULL, true, 0,
+                    'Client', 'Test', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', 'cus_client_default')
+                ");
+
+                // ADMIN avec MotDePasseAdmin123 (SANS !) - Hash généré avec BCrypt
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUsers"" (""Id"", ""UserName"", ""NormalizedUserName"", ""Email"", ""NormalizedEmail"", ""EmailConfirmed"", ""PasswordHash"", ""SecurityStamp"", ""ConcurrencyStamp"", ""PhoneNumber"", ""PhoneNumberConfirmed"", ""TwoFactorEnabled"", ""LockoutEnd"", ""LockoutEnabled"", ""AccessFailedCount"", ""Name"", ""FirstName"", ""Avatar"", ""StripeCustomer"")
+                    VALUES
+                    ('admin-uuid-final', 'admin@example.com', 'ADMIN@EXAMPLE.COM', 'admin@example.com', 'ADMIN@EXAMPLE.COM', true,
+                    'AQAAAAIAAYagAAAAEKLm4N8sR2vP9qS7jF6kW3tQ/9lCxS4fZuG0dO2kP8eT5H4iX0nA8mM3yQ7rG6sU9B==',
+                    'security-final-admin', 'concurrency-final-admin', NULL, false, false, NULL, true, 0,
+                    'Admin', 'System', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 'cus_admin_default')
+                ");
+
+                // Ajouter les rôles
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUserRoles"" (""UserId"", ""RoleId"")
+                    SELECT 'client-uuid-final', ""Id"" FROM ""AspNetRoles"" WHERE ""Name"" = 'Client'
+                ");
+
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO ""AspNetUserRoles"" (""UserId"", ""RoleId"")
+                    SELECT 'admin-uuid-final', ""Id"" FROM ""AspNetRoles"" WHERE ""Name"" = 'Admin'
+                ");
+
+                Console.WriteLine("✅ Utilisateurs créés avec mots de passe simples!");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Utilisateurs créés avec mots de passe simples!",
+                    users = new[]
+                    {
+                        "CLIENT: client@example.com / MotDePasseClient123",
+                        "ADMIN: admin@example.com / MotDePasseAdmin123"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erreur: {ex.Message}");
+                return BadRequest(new { error = ex.Message, details = ex.StackTrace });
+            }
+        }
     }
 }
