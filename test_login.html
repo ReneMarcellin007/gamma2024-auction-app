@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Test de Connexion</h1>
+    <button onclick="testLogin()">Tester Connexion Client</button>
+    <button onclick="testAdmin()">Tester Connexion Admin</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test en cours...';
+
+            try {
+                const userData = {
+                    emailOuPseudo: "client@example.com",
+                    password: "MotDePasseClient123!"  // Avec le !
+                };
+
+                console.log('Envoi des données:', userData);
+
+                const response = await fetch('/api/home/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                console.log('Réponse:', data);
+
+                resultDiv.innerHTML = `
+                    <h3>Réponse Client (${response.status}):</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                resultDiv.innerHTML = `<p style="color: red">Erreur: ${error.message}</p>`;
+            }
+        }
+
+        async function testAdmin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test admin en cours...';
+
+            try {
+                const userData = {
+                    emailOuPseudo: "admin@example.com",
+                    password: "MotDePasseAdmin123!"  // Avec le !
+                };
+
+                console.log('Envoi des données admin:', userData);
+
+                const response = await fetch('/api/home/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                console.log('Réponse admin:', data);
+
+                resultDiv.innerHTML = `
+                    <h3>Réponse Admin (${response.status}):</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                console.error('Erreur admin:', error);
+                resultDiv.innerHTML = `<p style="color: red">Erreur: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

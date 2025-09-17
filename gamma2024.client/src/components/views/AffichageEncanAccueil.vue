@@ -46,34 +46,42 @@
     }
 
     onMounted(async () => {
-        if (props.type == 0) {
-            const reponse = await store.dispatch("chercherEncanEnCours");
-            encan.value = reponse.data;
-
-            if (encan.value != '') {
-                voirEncan.value = function () { router.push({ name: 'EncanPresent' }) }
+        try {
+            if (props.type == 0) {
+                const reponse = await store.dispatch("chercherEncanEnCours");
+                if (reponse && reponse.data) {
+                    encan.value = reponse.data;
+                    if (encan.value != '') {
+                        voirEncan.value = function () { router.push({ name: 'EncanPresent' }) }
+                    }
+                }
             }
-        }
-        else if (props.type == -1) {
-            const reponse = await store.dispatch("chercherEncansPasses");
-            voirEncans.value = function () { router.push({ name: 'EncansPasses' }) }
+            else if (props.type == -1) {
+                const reponse = await store.dispatch("chercherEncansPasses");
+                voirEncans.value = function () { router.push({ name: 'EncansPasses' }) }
 
-            if (reponse.data != '') {
-                encan.value = reponse.data[0]
-                voirEncan.value = function () { router.push({ name: 'Encan', params: { numeroEncan: encan.value.numeroEncan } }) }
+                if (reponse && reponse.data && reponse.data != '') {
+                    encan.value = reponse.data[0]
+                    voirEncan.value = function () { router.push({ name: 'Encan', params: { numeroEncan: encan.value.numeroEncan } }) }
+                }
             }
-        }
-        else {
-            const reponse = await store.dispatch("chercherEncansFuturs");
-            voirEncans.value = function () { router.push({ name: 'EncansFuturs' }) }
+            else {
+                const reponse = await store.dispatch("chercherEncansFuturs");
+                voirEncans.value = function () { router.push({ name: 'EncansFuturs' }) }
 
-            if (reponse.data != '') {
-                encan.value = reponse.data[0]
-                voirEncan.value = function () { router.push({ name: 'Encan', params: { numeroEncan: encan.value.numeroEncan } }) }
+                if (reponse && reponse.data && reponse.data != '') {
+                    encan.value = reponse.data[0]
+                    voirEncan.value = function () { router.push({ name: 'Encan', params: { numeroEncan: encan.value.numeroEncan } }) }
+                }
             }
+        } catch (error) {
+            console.error('Erreur lors du chargement des encans:', error);
+            // Afficher aucun encan trouvé en cas d'erreur
+            encan.value = '';
+        } finally {
+            // IMPORTANT: Toujours arrêter le chargement, même en cas d'erreur
+            chargement.value = false;
         }
-
-        chargement.value = false;
     });
 </script>
 
