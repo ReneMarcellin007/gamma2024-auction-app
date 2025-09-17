@@ -236,6 +236,18 @@ namespace Gamma2024.Server.Controllers
             {
                 Console.WriteLine("🔑 CRÉATION UTILISATEURS AVEC VRAIS HASH IDENTITY");
 
+                // Créer les rôles s'ils n'existent pas
+                if (!await _roleManager.RoleExistsAsync("Admin"))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                    Console.WriteLine("✅ Rôle Admin créé");
+                }
+                if (!await _roleManager.RoleExistsAsync("Client"))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("Client"));
+                    Console.WriteLine("✅ Rôle Client créé");
+                }
+
                 // Supprimer les utilisateurs existants
                 var existingClient = await _userManager.FindByEmailAsync("client@example.com");
                 if (existingClient != null)
