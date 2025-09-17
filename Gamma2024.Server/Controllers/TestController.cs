@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Gamma2024.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Gamma2024.Server.Models;
 
 namespace Gamma2024.Server.Controllers
 {
@@ -9,10 +11,14 @@ namespace Gamma2024.Server.Controllers
     public class TestController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public TestController(ApplicationDbContext context)
+        public TestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [HttpPost("force-seed")]
@@ -214,6 +220,94 @@ namespace Gamma2024.Server.Controllers
                         "CLIENT: client@example.com / MotDePasseClient123",
                         "ADMIN: admin@example.com / MotDePasseAdmin123"
                     }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erreur: {ex.Message}");
+                return BadRequest(new { error = ex.Message, details = ex.StackTrace });
+            }
+        }
+
+        [HttpPost("create-users-proper")]
+        public async Task<IActionResult> CreateUsersProper()
+        {
+            try
+            {
+                Console.WriteLine("🔑 CRÉATION UTILISATEURS AVEC VRAIS HASH IDENTITY");
+
+                // Supprimer les utilisateurs existants
+                var existingClient = await _userManager.FindByEmailAsync("client@example.com");
+                if (existingClient != null)
+                {
+                    await _userManager.DeleteAsync(existingClient);
+                }
+
+                var existingAdmin = await _userManager.FindByEmailAsync("admin@example.com");
+                if (existingAdmin != null)
+                {
+                    await _userManager.DeleteAsync(existingAdmin);
+                }
+
+                // Créer CLIENT avec MotDePasseClient123
+                var client = new ApplicationUser
+                {
+                    Id = "client-uuid-final",
+                    UserName = "client@example.com",
+                    Email = "client@example.com",
+                    EmailConfirmed = true,
+                    Name = "Client",
+                    FirstName = "Test",
+                    Avatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+                    StripeCustomer = "cus_client_default"
+                };
+
+                var clientResult = await _userManager.CreateAsync(client, "MotDePasseClient123");
+                if (clientResult.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(client, "Client");
+                    Console.WriteLine("✅ Client créé avec succès");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Erreur client: {string.Join(", ", clientResult.Errors.Select(e => e.Description))}");
+                }
+
+                // Créer ADMIN avec MotDePasseAdmin123
+                var admin = new ApplicationUser
+                {
+                    Id = "admin-uuid-final",
+                    UserName = "admin@example.com",
+                    Email = "admin@example.com",
+                    EmailConfirmed = true,
+                    Name = "Admin",
+                    FirstName = "System",
+                    Avatar = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+                    StripeCustomer = "cus_admin_default"
+                };
+
+                var adminResult = await _userManager.CreateAsync(admin, "MotDePasseAdmin123");
+                if (adminResult.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(admin, "Admin");
+                    Console.WriteLine("✅ Admin créé avec succès");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Erreur admin: {string.Join(", ", adminResult.Errors.Select(e => e.Description))}");
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Utilisateurs créés avec vrais hash Identity!",
+                    users = new[]
+                    {
+                        "CLIENT: client@example.com / MotDePasseClient123",
+                        "ADMIN: admin@example.com / MotDePasseAdmin123"
+                    },
+                    clientResult = clientResult.Succeeded,
+                    adminResult = adminResult.Succeeded
                 });
             }
             catch (Exception ex)
