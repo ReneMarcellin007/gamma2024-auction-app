@@ -226,7 +226,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
-        var jwtKey = builder.Configuration["Jwt:Key"] ?? "UneCleSecuriseeDoExactement32Char";
+        var jwtKey = builder.Configuration["Jwt:Key"] ?? "UneCleSecuriseePourGamma2024QuiFaitAuMoins256Bits";
         Console.WriteLine($"JWT Key configured: {(!string.IsNullOrEmpty(jwtKey) ? "Yes" : "No")}");
         
         options.TokenValidationParameters = new TokenValidationParameters
