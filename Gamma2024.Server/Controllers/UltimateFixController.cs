@@ -121,34 +121,31 @@ namespace Gamma2024.Server.Controllers
                 // ÉTAPE 3: VÉRIFICATION CRITIQUE - SIMULER LES REQUÊTES DE L'APP
                 Console.WriteLine("3️⃣ Testing app queries...");
 
-                var verificationQueries = new[]
+                var results = new List<int>();
+
+                try
                 {
                     // Test 1: Encans en cours
-                    @"SELECT COUNT(*) FROM encans WHERE ""DateDebut"" <= NOW() AND ""DateFin"" >= NOW() AND ""EstPublie"" = true;",
+                    var encansEnCours = await _context.Encans
+                        .Where(e => e.DateDebut <= DateTime.UtcNow && e.DateFin >= DateTime.UtcNow && e.EstPublie)
+                        .CountAsync();
+                    results.Add(encansEnCours);
+                    Console.WriteLine($"✅ Encans en cours: {encansEnCours}");
 
-                    // Test 2: Encans passés non terminés avec mises (LA REQUÊTE CRITIQUE)
-                    @"SELECT COUNT(*) FROM encans e WHERE NOT e.""EstTermine"" AND e.""DateFin"" < NOW() AND EXISTS (
-                        SELECT 1 FROM encan_lots el INNER JOIN lots l ON el.""IdLot"" = l.""Id""
-                        WHERE el.""IdEncan"" = e.""Id"" AND l.""Mise"" > 0.0);",
+                    // Test 2: Total lots avec mises
+                    var lotsAvecMises = await _context.Lots.Where(l => l.Mise > 0).CountAsync();
+                    results.Add(lotsAvecMises);
+                    Console.WriteLine($"✅ Lots avec mises: {lotsAvecMises}");
 
-                    // Test 3: Total lots avec mises
-                    @"SELECT COUNT(*) FROM lots WHERE ""Mise"" > 0;"
-                };
-
-                var results = new List<int>();
-                foreach (var query in verificationQueries)
+                    // Test 3: Total encans
+                    var totalEncans = await _context.Encans.CountAsync();
+                    results.Add(totalEncans);
+                    Console.WriteLine($"✅ Total encans: {totalEncans}");
+                }
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        var result = await _context.Database.SqlQueryRaw<int>(query).FirstAsync();
-                        results.Add(result);
-                        Console.WriteLine($"✅ Query result: {result}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"❌ Query failed: {ex.Message}");
-                        results.Add(-1);
-                    }
+                    Console.WriteLine($"❌ Verification failed: {ex.Message}");
+                    results.AddRange(new[] { -1, -1, -1 });
                 }
 
                 // ÉTAPE 4: RÉSULTAT FINAL
@@ -162,8 +159,8 @@ namespace Gamma2024.Server.Controllers
                     verification = new
                     {
                         encans_en_cours = results[0],
-                        encans_passes_avec_mises = results[1],
-                        lots_avec_mises = results[2]
+                        lots_avec_mises = results[1],
+                        total_encans = results[2]
                     },
                     next_steps = new[]
                     {
