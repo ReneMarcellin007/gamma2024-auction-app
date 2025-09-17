@@ -30,6 +30,39 @@ namespace Gamma2024.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginVM model)
         {
+            return await ProcessLogin(model);
+        }
+
+        // Endpoint alternatif pour contourner le problème du caractère ! en JSON
+        [HttpPost("login-safe")]
+        public async Task<IActionResult> LoginSafe([FromBody] dynamic data)
+        {
+            try
+            {
+                string emailOuPseudo = data?.emailOuPseudo?.ToString() ?? "";
+                string passwordBase64 = data?.passwordBase64?.ToString() ?? "";
+
+                if (string.IsNullOrEmpty(emailOuPseudo) || string.IsNullOrEmpty(passwordBase64))
+                {
+                    return BadRequest(new { element = "validation", message = "Email et mot de passe requis" });
+                }
+
+                // Décoder le mot de passe depuis Base64
+                byte[] passwordBytes = Convert.FromBase64String(passwordBase64);
+                string password = System.Text.Encoding.UTF8.GetString(passwordBytes);
+
+                var model = new LoginVM { EmailOuPseudo = emailOuPseudo, Password = password };
+                return await ProcessLogin(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Erreur login-safe: {ex.Message}");
+                return BadRequest(new { element = "error", message = "Erreur de décodage" });
+            }
+        }
+
+        private async Task<IActionResult> ProcessLogin(LoginVM model)
+        {
             _logger.LogInformation($"=== LOGIN ATTEMPT ===");
             _logger.LogInformation($"Email/Username: {model?.EmailOuPseudo}");
             
@@ -153,6 +186,17 @@ namespace Gamma2024.Server.Controllers
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // Endpoint de test pour forcer le déploiement
+        [HttpGet("test-deploy")]
+        public IActionResult TestDeploy()
+        {
+            return Ok(new {
+                message = "Backend déployé avec succès - Endpoint login-safe disponible",
+                timestamp = DateTime.UtcNow,
+                version = "2.1-login-fix"
+            });
         }
     }
 }
