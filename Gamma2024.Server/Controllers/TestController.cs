@@ -36,9 +36,9 @@ namespace Gamma2024.Server.Controllers
                 await _context.Database.EnsureCreatedAsync();
                 Console.WriteLine("✅ Tables créées/vérifiées");
 
-                // Exécuter le seeder
-                DatabaseSeeder.SeedDatabase(HttpContext.RequestServices);
-                Console.WriteLine("✅ Seeder exécuté");
+                // DÉSACTIVÉ: Le DatabaseSeeder causait des problèmes de contraintes FK
+                // Utilisez plutôt /api/ultimatefix/fix-everything-now
+                Console.WriteLine("⚠️ DatabaseSeeder désactivé - Utilisez UltimateFixController");
 
                 // Vérifier les résultats
                 var encanCount = await _context.Encans.CountAsync();
